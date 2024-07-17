@@ -10,8 +10,12 @@ public class ProceduralTerrain : MonoBehaviour
 
     public float scale = 20f;
 
-    public float heightFrequency = 0.1f;
-    public float widthFrequencey = 0.1f;
+    public float startFrequency = 0.1f;
+    public float startAmplitude = 1.0f;
+    public float gain = 0.5f;
+    public float lacunarity = 2.0f;
+    public int octaveCount = 4;
+    public float fudgeFactor = 0.1f;
 
     public float powerValue = 0.1f;
 
@@ -20,7 +24,7 @@ public class ProceduralTerrain : MonoBehaviour
 
     public int seed = 203;
 
-    public List<OctaveGenerator.Octave> octaves = new List<OctaveGenerator.Octave>();
+    public List<Octave> octaves = new List<Octave>();
 
     public List<TerrainType> regions;
 
@@ -34,46 +38,37 @@ public class ProceduralTerrain : MonoBehaviour
     Terrain terrain;
     TerrainLayer[] terrainLayers;
     float[,] heightMap;
+    System.Random prnGenerator;
 
     // Start is called before the first frame update
     void Start()
     {
-        //add atleast one octave
-        if (octaves.Count == 0)
-        {
-            octaves = OctaveGenerator.GenerateOctaves(8, 0.5f, 1f, heightFrequency, widthFrequencey);
-        }
+        prnGenerator = new System.Random(seed);
         terrain = GetComponent<Terrain>();
-        terrainLayers = new TerrainLayer[regions.Count];
-        InitializeTerrainLayers();
-        terrain.terrainData = GenerateTerrain(terrain.terrainData);
-    }
-
-    private void InitializeTerrainLayers()
-    {
-        for (int i = 0; i < regions.Count; i++)
-        {
-            terrainLayers[i] = new TerrainLayer();
-            terrainLayers[i].diffuseTexture = new Texture2D(512, 512);
-            terrainLayers[i].diffuseTexture.wrapMode = TextureWrapMode.Repeat;
-            terrainLayers[i].diffuseTexture.filterMode = FilterMode.Trilinear;
-            terrainLayers[i].diffuseTexture.Apply();
-            terrainLayers[i].tileSize = new Vector2(15, 15);
-            terrainLayers[i].tileOffset = new Vector2(0, 0);
-            terrainLayers[i].specular = regions[i].color;
-            terrainLayers[i].metallic = 0;
-            terrainLayers[i].smoothness = 0.5f;
-            terrainLayers[i].normalMapTexture = new Texture2D(512, 512);
-            terrainLayers[i].normalMapTexture.wrapMode = TextureWrapMode.Repeat;
-            terrainLayers[i].normalMapTexture.filterMode = FilterMode.Trilinear;
-            terrainLayers[i].normalMapTexture.Apply();
-        }
+        terrainLayers = GenerateTerrainLayers();
+        terrain.terrainData.terrainLayers = terrainLayers;
     }
 
     // Update is called once per frame
     void Update()
     {
-        //terrain.terrainData = GenerateTerrain(terrain.terrainData);
+        octaves = OctaveGenerator.GenerateOctaves(octaveCount, gain, startAmplitude, startFrequency, lacunarity);
+        terrain.terrainData = GenerateTerrain(terrain.terrainData);
+    }
+
+    TerrainLayer[] GenerateTerrainLayers()
+    {
+        List<Texture2D> textures = new List<Texture2D>();
+        TerrainLayer[] terrainLayers = new TerrainLayer[regions.Count];
+        for (int i = 0; i < regions.Count; i++)
+        {
+
+            Texture2D texture = TextureGenerator.GenerateTexture(512, 512, regions[i]);
+            terrainLayers[i] = new TerrainLayer();
+            terrainLayers[i].diffuseTexture = texture;
+            terrainLayers[i].tileSize = new Vector2(1, 1);
+        }
+        return terrainLayers;
     }
 
     TerrainData GenerateTerrain(TerrainData terrainData)
@@ -84,19 +79,15 @@ public class ProceduralTerrain : MonoBehaviour
 
         heightMap = GenerateHeightMap();
         terrainData.SetHeights(0, 0, heightMap);
-        terrainData.terrainLayers = terrainLayers;
         //set the color
         terrainData.SetAlphamaps(0, 0, GenerateAlphaMap(terrainData));
  
-
         return terrainData;
     }
 
     float[,] GenerateHeightMap()
     {
-        float[,] heights = new float[width, height];
-
-        System.Random prnGenerator = new System.Random(seed);
+        float[,] heights = new float[terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution];
         Vector2[] randomOffsets = new Vector2[octaves.Count];
         for (int i = 0; i < octaves.Count; i++)
         {
@@ -106,9 +97,9 @@ public class ProceduralTerrain : MonoBehaviour
         }
 
 
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < terrain.terrainData.heightmapResolution; x++)
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < terrain.terrainData.heightmapResolution; y++)
             {
                 heights[x, y] = CalculateHeight(x, y, randomOffsets);
             }
@@ -127,11 +118,13 @@ public class ProceduralTerrain : MonoBehaviour
         float halfWidth = width / 2;
         float halfHeight = height / 2;
 
+        float octaveSum = OctaveGenerator.CalculateAmplitudeSum(octaves);
+
         for (int i = 0; i <  octaves.Count; i++)
         {
-            float xCoord = ((float)x - halfWidth) / scale * octaves[i].xFrequency + offsets[i].x;
-            float yCoord = ((float)y - halfHeight) / scale * octaves[i].yFrequency + offsets[i].y;
-            float perlinValue = Mathf.PerlinNoise(xCoord, yCoord) * 2 - 1; // -1 to 1
+            float xCoord = ((float)x - halfWidth) / scale * octaves[i].frequency + offsets[i].x;
+            float yCoord = ((float)y - halfHeight) / scale * octaves[i].frequency + offsets[i].y;
+            float perlinValue = Mathf.PerlinNoise(xCoord, yCoord);
             finalHeight += perlinValue * octaves[i].amplitude;
 
             if(finalHeight > maxHeight)
@@ -144,9 +137,9 @@ public class ProceduralTerrain : MonoBehaviour
             }
         }
 
-        finalHeight /= OctaveGenerator.CalculateAmplitudeSum(octaves);
-        //finalHeight = Mathf.InverseLerp(minHeight, maxHeight, finalHeight);
-        //finalHeight = Mathf.Pow(finalHeight, powerValue);
+        finalHeight /= octaveSum;
+        //finalHeight = Mathf.Lerp(minHeight, maxHeight, finalHeight);
+        finalHeight = Mathf.Pow(finalHeight * fudgeFactor, powerValue);
         return finalHeight;
     }
 
@@ -160,9 +153,6 @@ public class ProceduralTerrain : MonoBehaviour
 
                 float normalizedX = (float)x / terrainData.alphamapWidth;
                 float normalizedY = (float)y / terrainData.alphamapHeight;
-
-                //Debug.Log("normalizedX : " + normalizedX + " normalizedY : " + normalizedY);
-
                 float heightValue = heightMap[Mathf.FloorToInt(normalizedX * width), Mathf.FloorToInt(normalizedY * height)];
 
                 for (int i = 0; i < regions.Count; i++)
@@ -178,21 +168,4 @@ public class ProceduralTerrain : MonoBehaviour
 
         return alphas;
     }
-}
-
-[System.Serializable]
-public struct TerrainType
-{
-    public TerrainTypeIndex terrainType;
-    public float height;
-    public Color color;
-}
-
-public enum TerrainTypeIndex
-{
-    Water,
-    Sand,
-    Grass,
-    Mud,
-    Snow
 }

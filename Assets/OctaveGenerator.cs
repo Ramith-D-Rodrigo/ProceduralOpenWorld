@@ -3,16 +3,8 @@ using UnityEngine;
 
 public class OctaveGenerator
 {
-    [System.Serializable]
-    public struct Octave
-    {
-        public float amplitude;
-        public float xFrequency;
-        public float yFrequency;
-    }
-
     public static List<Octave> GenerateOctaves(int count, float gain,
-        float startAmplitude = 1f, float xFrequency = 0.0001f, float yFrequency = 0.0001f)
+        float startAmplitude = 1f, float startFrequency = 1f, float lacunarity = 2f)
     {
         List<Octave> octaves = new List<Octave>(count);
 
@@ -20,8 +12,7 @@ public class OctaveGenerator
         octaves.Add(new Octave
         {
             amplitude = startAmplitude,
-            xFrequency = xFrequency,
-            yFrequency = yFrequency
+            frequency = startFrequency
         });
 
         for (int i = 1; i < count; i++)
@@ -29,8 +20,7 @@ public class OctaveGenerator
             octaves.Add(new Octave
             {
                 amplitude = octaves[i - 1].amplitude * gain,    //amplitude decreases by gain
-                xFrequency = xFrequency * Mathf.Pow(2, i),
-                yFrequency = yFrequency * Mathf.Pow(2, i)
+                frequency = octaves[i - 1].frequency * lacunarity
             });
         }
 
@@ -46,4 +36,11 @@ public class OctaveGenerator
         }
         return sum;
     }
+}
+
+[System.Serializable]
+public struct Octave
+{
+    public float amplitude;
+    public float frequency;
 }
