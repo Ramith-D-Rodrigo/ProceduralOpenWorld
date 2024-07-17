@@ -38,12 +38,10 @@ public class ProceduralTerrain : MonoBehaviour
     Terrain terrain;
     TerrainLayer[] terrainLayers;
     float[,] heightMap;
-    System.Random prnGenerator;
 
     // Start is called before the first frame update
     void Start()
     {
-        prnGenerator = new System.Random(seed);
         terrain = GetComponent<Terrain>();
         terrainLayers = GenerateTerrainLayers();
         terrain.terrainData.terrainLayers = terrainLayers;
@@ -87,60 +85,19 @@ public class ProceduralTerrain : MonoBehaviour
 
     float[,] GenerateHeightMap()
     {
-        float[,] heights = new float[terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution];
-        Vector2[] randomOffsets = new Vector2[octaves.Count];
-        for (int i = 0; i < octaves.Count; i++)
-        {
-            float xOff = prnGenerator.Next(-100000, 100000) + xOffSet;
-            float yOff = prnGenerator.Next(-100000, 100000) + yOffSet;
-            randomOffsets[i] = new Vector2(xOff, yOff);
-        }
+        float[,] heights = new float[width, height];
+        Vector2[] randomOffsets = Noise.GenerateRandomOffsets(seed, octaves, xOffSet, yOffSet);
 
-
-        for (int x = 0; x < terrain.terrainData.heightmapResolution; x++)
+        for (int x = 0; x < width; x++)
         {
-            for (int y = 0; y < terrain.terrainData.heightmapResolution; y++)
+            for (int y = 0; y < height; y++)
             {
-                heights[x, y] = CalculateHeight(x, y, randomOffsets);
+                heights[x, y] = Noise.CalculateHeight(x, y, randomOffsets, octaves, width, height,
+                    scale, fudgeFactor, powerValue);
             }
         }
 
         return heights;
-    }
-
-    float CalculateHeight(int x, int y, Vector2[] offsets)
-    {
-        float finalHeight = 0.0f;
-
-        float minHeight = float.MaxValue;
-        float maxHeight = float.MinValue;
-        
-        float halfWidth = width / 2;
-        float halfHeight = height / 2;
-
-        float octaveSum = OctaveGenerator.CalculateAmplitudeSum(octaves);
-
-        for (int i = 0; i <  octaves.Count; i++)
-        {
-            float xCoord = ((float)x - halfWidth) / scale * octaves[i].frequency + offsets[i].x;
-            float yCoord = ((float)y - halfHeight) / scale * octaves[i].frequency + offsets[i].y;
-            float perlinValue = Mathf.PerlinNoise(xCoord, yCoord);
-            finalHeight += perlinValue * octaves[i].amplitude;
-
-            if(finalHeight > maxHeight)
-            {
-                maxHeight = finalHeight;
-            }
-            else if(finalHeight < minHeight)
-            {
-                minHeight = finalHeight;
-            }
-        }
-
-        finalHeight /= octaveSum;
-        //finalHeight = Mathf.Lerp(minHeight, maxHeight, finalHeight);
-        finalHeight = Mathf.Pow(finalHeight * fudgeFactor, powerValue);
-        return finalHeight;
     }
 
     float[,,] GenerateAlphaMap(TerrainData terrainData)
