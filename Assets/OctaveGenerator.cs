@@ -9,19 +9,15 @@ public class OctaveGenerator
         List<Octave> octaves = new List<Octave>(count);
 
         //for the first octave
-        octaves.Add(new Octave
-        {
-            amplitude = startAmplitude,
-            frequency = startFrequency
-        });
-
-        for (int i = 1; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
             octaves.Add(new Octave
             {
-                amplitude = octaves[i - 1].amplitude * gain,    //amplitude decreases by gain
-                frequency = octaves[i - 1].frequency * lacunarity
+                amplitude = startAmplitude,
+                frequency = startFrequency
             });
+            startAmplitude *= gain;
+            startFrequency *= lacunarity;
         }
 
         return octaves;

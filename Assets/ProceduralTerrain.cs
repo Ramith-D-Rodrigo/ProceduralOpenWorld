@@ -35,6 +35,8 @@ public class ProceduralTerrain : MonoBehaviour
     public bool useFibonacci = false;
     public bool useGoldenRatio = false;
 
+    public AnimationCurve regionHeightCurve;
+
     Terrain terrain;
     TerrainLayer[] terrainLayers;
     float[,] heightMap;
@@ -61,7 +63,8 @@ public class ProceduralTerrain : MonoBehaviour
         for (int i = 0; i < regions.Count; i++)
         {
 
-            Texture2D texture = TextureGenerator.GenerateTexture(512, 512, regions[i]);
+            Texture2D texture = TextureGenerator.GenerateTextureByTerrainType(width, height, regions[i], 
+                xOffSet, yOffSet, octaves, scale);
             terrainLayers[i] = new TerrainLayer();
             terrainLayers[i].diffuseTexture = texture;
             terrainLayers[i].tileSize = new Vector2(1, 1);
@@ -88,12 +91,28 @@ public class ProceduralTerrain : MonoBehaviour
         float[,] heights = new float[width, height];
         Vector2[] randomOffsets = Noise.GenerateRandomOffsets(seed, octaves, xOffSet, yOffSet);
 
+        float maxElevation = float.MinValue;
+        float minElevation = float.MaxValue;
+
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                heights[x, y] = Noise.CalculateHeight(x, y, randomOffsets, octaves, width, height,
-                    scale, fudgeFactor, powerValue);
+                heights[x, y] = Noise.CalculateElevation(x, y, randomOffsets, octaves, width, height,
+                    scale);
+            }
+        }
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                float finalElevation = Mathf.InverseLerp(minElevation, maxElevation, heights[x, y]);
+                if (regions != null && regions.Count > 0)
+                {
+                    finalElevation = regionHeightCurve.Evaluate(finalElevation);
+                }
+                heights[x, y] = finalElevation;
             }
         }
 
