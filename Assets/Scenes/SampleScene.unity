@@ -161,34 +161,97 @@ MonoBehaviour:
   startAmplitude: 1
   gain: 0.5
   lacunarity: 2
-  octaveCount: 0
+  octaveCount: 5
   fudgeFactor: 1.002
   powerValue: 1.5
   xOffSet: 10
   yOffSet: 10
-  seed: 203
-  octaves: []
+  seed: 0
+  octaves:
+  - amplitude: 1
+    frequency: 1
+  - amplitude: 0.5
+    frequency: 2
+  - amplitude: 0.25
+    frequency: 4
+  - amplitude: 0.125
+    frequency: 8
+  - amplitude: 0.0625
+    frequency: 16
   regions:
-  - terrainType: 0
-    height: 0
-    color: {r: 0, g: 0.17713475, b: 1, a: 0}
-  - terrainType: 1
-    height: 0.3
-    color: {r: 0.7830189, g: 0.7605759, b: 0.4764596, a: 0}
-  - terrainType: 2
-    height: 0.5
-    color: {r: 0, g: 1, b: 0.046749115, a: 0}
-  - terrainType: 3
+  - regionName: 
+    height: 0.1
+    lowColor: {r: 0, g: 0, b: 0, a: 0}
+    highColor: {r: 0, g: 0, b: 0, a: 0}
+    texture: {fileID: 0}
+  - regionName: 
+    height: 0.15
+    lowColor: {r: 0, g: 0, b: 0, a: 0}
+    highColor: {r: 0, g: 0, b: 0, a: 0}
+    texture: {fileID: 0}
+  - regionName: 
+    height: 0.25
+    lowColor: {r: 0, g: 0, b: 0, a: 0}
+    highColor: {r: 0, g: 0, b: 0, a: 0}
+    texture: {fileID: 0}
+  - regionName: 
+    height: 0.4
+    lowColor: {r: 0, g: 0, b: 0, a: 0}
+    highColor: {r: 0, g: 0, b: 0, a: 0}
+    texture: {fileID: 0}
+  - regionName: 
+    height: 0.55
+    lowColor: {r: 0, g: 0, b: 0, a: 0}
+    highColor: {r: 0, g: 0, b: 0, a: 0}
+    texture: {fileID: 0}
+  - regionName: 
     height: 0.7
-    color: {r: 0.26415092, g: 0.122406736, b: 0.10341757, a: 0}
-  - terrainType: 4
+    lowColor: {r: 0, g: 0, b: 0, a: 0}
+    highColor: {r: 0, g: 0, b: 0, a: 0}
+    texture: {fileID: 0}
+  - regionName: 
     height: 1
-    color: {r: 0.7216981, g: 1, b: 0.9371914, a: 0}
+    lowColor: {r: 0, g: 0, b: 0, a: 0}
+    highColor: {r: 0, g: 0, b: 0, a: 0}
+    texture: {fileID: 0}
   useSine: 0
   useCosine: 0
   usePow: 0
   useFibonacci: 0
   useGoldenRatio: 0
+  regionHeightCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.30869943
+      value: 0.03143478
+      inSlope: 0.25282958
+      outSlope: 0.25282958
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.19123207
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1.5400324
+      outSlope: 1.5400324
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.0738955
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!154 &268166532
 TerrainCollider:
   m_ObjectHideFlags: 0
@@ -358,6 +421,120 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &728698268
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 728698272}
+  - component: {fileID: 728698271}
+  - component: {fileID: 728698270}
+  - component: {fileID: 728698269}
+  m_Layer: 0
+  m_Name: Quad
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &728698269
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 728698268}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a37d6cd7a5638954cbd8a345bcb65228, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  width: 256
+  height: 256
+  texture: {fileID: 0}
+  type:
+    regionName: Snow
+    height: 1
+    lowColor: {r: 0.5454343, g: 0.9632631, b: 0.9716981, a: 0}
+    highColor: {r: 1, g: 0.9481132, b: 0.9481132, a: 0}
+    texture: {fileID: 0}
+  scale: 10.62
+  startFrequency: 0.07
+  startAmplitude: 4.01
+  gain: 0.2
+  lacunarity: 2.53
+  octaveCount: 4
+  xOffSet: 16.5
+  yOffSet: 10.28
+  seed: -2
+--- !u!23 &728698270
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 728698268}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 8a13821400338f3449fcd5673a502fd4, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &728698271
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 728698268}
+  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &728698272
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 728698268}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 27.74478, y: -5.336834, z: 27.295681}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1604119311
 GameObject:
   m_ObjectHideFlags: 0
@@ -389,22 +566,98 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cf4ad8258bb4cb418fc7140094c0aff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  depth: 20
-  width: 256
-  height: 256
-  scale: 200
+  depth: 21
+  width: 100
+  height: 100
+  scale: 33.7
   startFrequency: 1
   startAmplitude: 1
   gain: 0.5
   lacunarity: 2
-  octaveCount: 4
-  fudgeFactor: 0.1
-  powerValue: 0.1
+  octaveCount: 5
   xOffSet: 0
-  yOffSet: 0
-  seed: 203
-  octaves: []
-  regions: []
+  yOffSet: -0.54
+  seed: 21
+  octaves:
+  - amplitude: 1
+    frequency: 1
+  - amplitude: 0.5
+    frequency: 2
+  - amplitude: 0.25
+    frequency: 4
+  - amplitude: 0.125
+    frequency: 8
+  - amplitude: 0.0625
+    frequency: 16
+  regions:
+  - regionName: DeepWater
+    height: 0.1
+    lowColor: {r: 0.026470454, g: 0, b: 0.3490566, a: 0}
+    highColor: {r: 0.09734372, g: 0.054111768, b: 0.6037736, a: 1}
+    texture: {fileID: 2800000, guid: e17fe834b4c2e17459df8de01efcbeff, type: 3}
+  - regionName: Water
+    height: 0.15
+    lowColor: {r: 0, g: 0.0751702, b: 0.6792453, a: 0}
+    highColor: {r: 0.1544589, g: 0.23014554, b: 0.8396226, a: 1}
+    texture: {fileID: 2800000, guid: cb5885f6572f0ba43ad5dc1c23c96bd2, type: 3}
+  - regionName: Beach
+    height: 0.25
+    lowColor: {r: 0.6415094, g: 0.54858786, b: 0.36009255, a: 0}
+    highColor: {r: 0.8773585, g: 0.74630654, b: 0.48420256, a: 1}
+    texture: {fileID: 2800000, guid: 04cd19517c2329b418c8f113a6e9a0a5, type: 3}
+  - regionName: Grass
+    height: 0.4
+    lowColor: {r: 0.29608068, g: 0.735849, b: 0.23949803, a: 0}
+    highColor: {r: 0.1901246, g: 0.509434, b: 0.14658241, a: 1}
+    texture: {fileID: 2800000, guid: c451ffeda26188448afc082803fd6a81, type: 3}
+  - regionName: Forest
+    height: 0.55
+    lowColor: {r: 0.14790049, g: 0.4056604, b: 0.112896055, a: 1}
+    highColor: {r: 0.07549094, g: 0.3018868, b: 0.044143822, a: 1}
+    texture: {fileID: 2800000, guid: ed5d8c291f6effe4085f384e9e068496, type: 3}
+  - regionName: Mud
+    height: 0.7
+    lowColor: {r: 0.4528302, g: 0.19370241, b: 0.057671774, a: 0}
+    highColor: {r: 0.2735849, g: 0.11702056, b: 0.0038714774, a: 0}
+    texture: {fileID: 2800000, guid: e86d74fcd4a3d8a4d83aa274082088da, type: 3}
+  - regionName: Snow
+    height: 1
+    lowColor: {r: 0.5454343, g: 0.9632631, b: 0.9716981, a: 0}
+    highColor: {r: 1, g: 0.9481132, b: 0.9481132, a: 0}
+    texture: {fileID: 2800000, guid: dde02fe70419c334db13711e8f3daa6d, type: 3}
+  regionHeightCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.30869943
+      value: 0.03143478
+      inSlope: 0.25282958
+      outSlope: 0.25282958
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.19123207
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1.5400324
+      outSlope: 1.5400324
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.0738955
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!23 &1604119313
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -425,7 +678,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10302, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 157fe879ced520c4aa822c2e4b5ed73f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -454,7 +707,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1604119311}
-  m_Mesh: {fileID: 0}
+  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &1604119315
 Transform:
   m_ObjectHideFlags: 0
@@ -477,3 +730,4 @@ SceneRoots:
   - {fileID: 705507995}
   - {fileID: 268166534}
   - {fileID: 1604119315}
+  - {fileID: 728698272}
