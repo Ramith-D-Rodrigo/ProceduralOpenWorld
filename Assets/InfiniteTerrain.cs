@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class InfiniteTerrain : MonoBehaviour
 {
+    public float scale = 1f;
+
     const float viewerPositionOffsetToUpdateChunks = 25f;
     float sqrViewerPositionOffsetToUpdateChunks = Mathf.Pow(viewerPositionOffsetToUpdateChunks, 2);
     Vector2 prevViewerPosition;
@@ -39,7 +41,7 @@ public class InfiniteTerrain : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        viewerPosition = new Vector2(viewer.position.x, viewer.position.z);
+        viewerPosition = new Vector2(viewer.position.x, viewer.position.z) / scale;
         if((prevViewerPosition - viewerPosition).sqrMagnitude > sqrViewerPositionOffsetToUpdateChunks)
         {
             prevViewerPosition = viewerPosition;
@@ -72,7 +74,7 @@ public class InfiniteTerrain : MonoBehaviour
                 {
                     terrainChunkDictionary.Add(
                         viewedChunkCoord, 
-                        new TerrainChunk(viewedChunkCoord, chunkSize, detailLevels, transform, testMaterial)
+                        new TerrainChunk(viewedChunkCoord, chunkSize, detailLevels, transform, testMaterial, scale)
                         );
                 }
             }
@@ -96,7 +98,7 @@ public class InfiniteTerrain : MonoBehaviour
 
         int previousLODIndex = -1;
 
-        public TerrainChunk(Vector2 coord, int size,LODInfo[] LODDetails, Transform parent, Material material)
+        public TerrainChunk(Vector2 coord, int size,LODInfo[] LODDetails, Transform parent, Material material, float scale)
         {
             detailLevels = LODDetails;
             position = coord * size;
@@ -107,8 +109,9 @@ public class InfiniteTerrain : MonoBehaviour
             meshFilter = meshObject.AddComponent<MeshFilter>();
             meshRenderer.sharedMaterial = material;
 
-            meshObject.transform.position = positionV3;
+            meshObject.transform.position = positionV3 * scale;
             meshObject.transform.parent = parent;
+            meshObject.transform.localScale = Vector3.one * scale;
             SetVisible(false);
 
             lodMeshes = new LODMesh[detailLevels.Length];

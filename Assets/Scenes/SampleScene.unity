@@ -863,6 +863,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d139c39c33b1c84bac3f016394a06bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  scale: 5
   detailLevels:
   - levelOfDetail: 0
     visibleDistThreshold: 200
