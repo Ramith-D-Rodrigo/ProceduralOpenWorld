@@ -11,7 +11,7 @@ public class ProceduralMeshTerrain : MonoBehaviour
     public const int mapChunkSize = 241;
 
     [Range(0,6)]
-    public int levelOfDetail;
+    public int previewLOD;
     public int depth = 20;
 
     public float scale = 20f;
@@ -122,22 +122,22 @@ public class ProceduralMeshTerrain : MonoBehaviour
         }
     }
 
-    public void RequestMapData(Action<float[,]> callBack)
+    public void RequestMapData(Vector2 center, Action<float[,]> callBack)
     {
         ThreadStart threadStart = delegate
         {
-            MapDataThread(callBack);
+            MapDataThread(center, callBack);
         };
 
         new Thread(threadStart).Start();
     }
 
     //runs on a different thread
-    void MapDataThread(Action<float[,]> callBack)
+    void MapDataThread(Vector2 center, Action<float[,]> callBack)
     {
         List<Octave> octaves = OctaveGenerator.GenerateOctaves(octaveCount, gain, startAmplitude,startFrequency, lacunarity);
 
-        float[,] noiseMap = Noise.CreateNoiseMap(mapChunkSize, mapChunkSize, seed, new Vector2(xOffSet, yOffSet), scale, octaves);
+        float[,] noiseMap = Noise.CreateNoiseMap(mapChunkSize, mapChunkSize, seed, new Vector2(xOffSet, yOffSet), scale, octaves, center);
 
         //lock the threadInfoQueue to prevent multiple threads from accessing it at the same time
         lock (mapThreadInfos)
@@ -146,17 +146,17 @@ public class ProceduralMeshTerrain : MonoBehaviour
         }
     }
 
-    public void RequestMeshData(float[,] noiseMap, Action<MeshData> callBack)
+    public void RequestMeshData(float[,] noiseMap, int levelOfDetail, Action<MeshData> callBack)
     {
         ThreadStart threadStart = delegate
         {
-            MeshDataThread(noiseMap, callBack);
+            MeshDataThread(noiseMap, levelOfDetail, callBack);
         };
 
         new Thread(threadStart).Start();
     }
 
-    void MeshDataThread(float[,] noiseMap, Action<MeshData> callBack)
+    void MeshDataThread(float[,] noiseMap, int levelOfDetail, Action<MeshData> callBack)
     {
         MeshData meshData = MeshGenerator.GenerateMeshData(noiseMap, levelOfDetail, regions, regionHeightCurve, depth);
 

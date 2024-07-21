@@ -673,7 +673,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cf4ad8258bb4cb418fc7140094c0aff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelOfDetail: 0
+  previewLOD: 0
   depth: 21
   scale: 33.7
   startFrequency: 1
@@ -863,8 +863,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d139c39c33b1c84bac3f016394a06bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  detailLevels:
+  - levelOfDetail: 0
+    visibleDistThreshold: 200
+  - levelOfDetail: 3
+    visibleDistThreshold: 400
+  - levelOfDetail: 6
+    visibleDistThreshold: 600
   viewer: {fileID: 1052094668}
-  testMaterial: {fileID: 2100000, guid: 93f9dff7c8cd5564eb64378df66f1783, type: 2}
+  testMaterial: {fileID: 2100000, guid: 157fe879ced520c4aa822c2e4b5ed73f, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

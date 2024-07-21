@@ -64,7 +64,7 @@ public class ProceduralTerrain : MonoBehaviour
         {
 
             Texture2D texture = TextureGenerator.GenerateTextureByTerrainType(width, height, regions[i], 
-                xOffSet, yOffSet, octaves, scale);
+                xOffSet, yOffSet, octaves, scale, transform.position);
             terrainLayers[i] = new TerrainLayer();
             terrainLayers[i].diffuseTexture = texture;
             terrainLayers[i].tileSize = new Vector2(1, 1);
