@@ -6,9 +6,11 @@ using UnityEngine;
 
 public class ProceduralMeshTerrain : MonoBehaviour
 {
+    const int mapChunkSize = 241;
+
+    [Range(0,6)]
+    public int levelOfDetail;
     public int depth = 20;
-    public int width = 256;
-    public int height = 256;
 
     public float scale = 20f;
     public float startFrequency = 0.1f;
@@ -50,7 +52,7 @@ public class ProceduralMeshTerrain : MonoBehaviour
     void Update()
     {
         octaves = OctaveGenerator.GenerateOctaves(octaveCount, gain, startAmplitude, startFrequency, lacunarity);
-        noiseMap = Noise.CreateNoiseMap(width, height, seed, new Vector2(xOffSet, yOffSet), scale, octaves);
+        noiseMap = Noise.CreateNoiseMap(mapChunkSize, mapChunkSize, seed, new Vector2(xOffSet, yOffSet), scale, octaves);
         CreateNoiseMapTexture();       
         CreateVerticesAndTriangles();
         SetShaderGraphVariables();
@@ -67,16 +69,22 @@ public class ProceduralMeshTerrain : MonoBehaviour
 
     private void CreateVerticesAndTriangles()
     {
-        vertices = new Vector3[width * height];
-        triangles = new int[(width-1) * (height-1) * 6];
-        uvs = new Vector2[width * height];
+        int width = noiseMap.GetLength(0);
+        int height = noiseMap.GetLength(1);
+
+        int levelOfDetailSimplicationIndex = (levelOfDetail == 0) ?  1 : levelOfDetail * 2;
+        int vertPerLine = (width - 1) / levelOfDetailSimplicationIndex + 1;
+
+        vertices = new Vector3[vertPerLine * vertPerLine];
+        triangles = new int[(vertPerLine - 1) * (vertPerLine - 1) * 6];
+        uvs = new Vector2[vertPerLine * vertPerLine];
 
         int vertIndex = 0;
         int triIndex = 0;
 
-        for (int z = 0; z < height; z++)
+        for (int z = 0; z < height; z+= levelOfDetailSimplicationIndex)
         {
-            for (int x = 0; x < width; x++)
+            for (int x = 0; x < width; x+= levelOfDetailSimplicationIndex)
             {
                 float finalElevation = noiseMap[x, z];
                 if (regions != null && regions.Count > 0)
@@ -89,12 +97,12 @@ public class ProceduralMeshTerrain : MonoBehaviour
                 if(x < width - 1 && z < height - 1)
                 {
                     triangles[triIndex] = vertIndex;
-                    triangles[triIndex + 1] = vertIndex + width;
+                    triangles[triIndex + 1] = vertIndex + vertPerLine;
                     triangles[triIndex + 2] = vertIndex + 1;
 
                     triangles[triIndex + 3] = vertIndex + 1;
-                    triangles[triIndex + 4] = vertIndex + width;
-                    triangles[triIndex + 5] = vertIndex + width + 1;
+                    triangles[triIndex + 4] = vertIndex + vertPerLine;
+                    triangles[triIndex + 5] = vertIndex + vertPerLine + 1;
 
                     triIndex += 6;
                 }
@@ -105,8 +113,8 @@ public class ProceduralMeshTerrain : MonoBehaviour
 
     private void CreateNoiseMapTexture()
     {
-        noiseMapTexture = new Texture2D(width, height);
-        Color[] colors = TextureGenerator.CreateColorMap(width, height, noiseMap, Color.black, Color.white);
+        noiseMapTexture = new Texture2D(mapChunkSize, mapChunkSize);
+        Color[] colors = TextureGenerator.CreateColorMap(mapChunkSize, mapChunkSize, noiseMap, Color.black, Color.white);
         noiseMapTexture.SetPixels(colors);
         noiseMapTexture.Apply();
     }
