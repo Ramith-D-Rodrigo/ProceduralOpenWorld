@@ -547,6 +547,7 @@ GameObject:
   - component: {fileID: 1604119314}
   - component: {fileID: 1604119313}
   - component: {fileID: 1604119312}
+  - component: {fileID: 1604119316}
   m_Layer: 0
   m_Name: World
   m_TagString: Untagged
@@ -566,9 +567,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cf4ad8258bb4cb418fc7140094c0aff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  levelOfDetail: 0
   depth: 21
-  width: 100
-  height: 100
   scale: 33.7
   startFrequency: 1
   startAmplitude: 1
@@ -591,22 +591,22 @@ MonoBehaviour:
     frequency: 16
   regions:
   - regionName: DeepWater
-    height: 0.1
+    height: 0.15
     lowColor: {r: 0.026470454, g: 0, b: 0.3490566, a: 0}
     highColor: {r: 0.09734372, g: 0.054111768, b: 0.6037736, a: 1}
     texture: {fileID: 2800000, guid: e17fe834b4c2e17459df8de01efcbeff, type: 3}
   - regionName: Water
-    height: 0.15
+    height: 0.2
     lowColor: {r: 0, g: 0.0751702, b: 0.6792453, a: 0}
     highColor: {r: 0.1544589, g: 0.23014554, b: 0.8396226, a: 1}
     texture: {fileID: 2800000, guid: cb5885f6572f0ba43ad5dc1c23c96bd2, type: 3}
   - regionName: Beach
-    height: 0.25
+    height: 0.28
     lowColor: {r: 0.6415094, g: 0.54858786, b: 0.36009255, a: 0}
     highColor: {r: 0.8773585, g: 0.74630654, b: 0.48420256, a: 1}
     texture: {fileID: 2800000, guid: 04cd19517c2329b418c8f113a6e9a0a5, type: 3}
   - regionName: Grass
-    height: 0.4
+    height: 0.45
     lowColor: {r: 0.29608068, g: 0.735849, b: 0.23949803, a: 0}
     highColor: {r: 0.1901246, g: 0.509434, b: 0.14658241, a: 1}
     texture: {fileID: 2800000, guid: c451ffeda26188448afc082803fd6a81, type: 3}
@@ -707,7 +707,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1604119311}
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 0}
 --- !u!4 &1604119315
 Transform:
   m_ObjectHideFlags: 0
@@ -723,6 +723,28 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!64 &1604119316
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1604119311}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
