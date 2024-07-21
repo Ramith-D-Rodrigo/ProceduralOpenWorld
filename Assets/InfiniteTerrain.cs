@@ -21,7 +21,7 @@ public class InfiniteTerrain : MonoBehaviour
 
     //to keep track of the terrain chunks and prevent duplicates
     Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new Dictionary<Vector2, TerrainChunk>();
-    List<TerrainChunk> lastVisibleTerrainChunks = new List<TerrainChunk>();
+    static List<TerrainChunk> lastVisibleTerrainChunks = new List<TerrainChunk>();
 
     static ProceduralMeshTerrain meshTerrainGenerator;
 
@@ -67,10 +67,6 @@ public class InfiniteTerrain : MonoBehaviour
                 if(terrainChunkDictionary.ContainsKey(viewedChunkCoord))
                 {
                     terrainChunkDictionary[viewedChunkCoord].UpdateTerrainChunk();
-                    if(terrainChunkDictionary[viewedChunkCoord].IsVisible())
-                    {
-                        lastVisibleTerrainChunks.Add(terrainChunkDictionary[viewedChunkCoord]);
-                    }
                 }
                 else
                 {
@@ -191,6 +187,7 @@ public class InfiniteTerrain : MonoBehaviour
                         lodMesh.RequestMeshData(noiseMap);
                     }
                 }
+                lastVisibleTerrainChunks.Add(this);
             }
 
             SetVisible(isVisible);
