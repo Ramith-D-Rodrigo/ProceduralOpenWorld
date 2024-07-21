@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Noise
 {
+    public enum NormalizeMode { Local, Global };
     public static float CalculateElevation(int x, int y, Vector2[] offsets, List<Octave> octaves,
             float width, float height, float scale)
     {
@@ -14,8 +15,8 @@ public class Noise
 
         for (int i = 0; i < octaves.Count; i++)
         {
-            float xCoord = (x - halfWidth) / scale * octaves[i].frequency + offsets[i].x;
-            float yCoord = (y - halfHeight) / scale * octaves[i].frequency + offsets[i].y;
+            float xCoord = (x - halfWidth + offsets[i].x) / scale * octaves[i].frequency;
+            float yCoord = (y - halfHeight + offsets[i].y) / scale * octaves[i].frequency;
             float perlinValue = Mathf.PerlinNoise(xCoord, yCoord) * 2 - 1;
             elevation += perlinValue * octaves[i].amplitude;
         }
@@ -30,15 +31,15 @@ public class Noise
         for (int i = 0; i < octaves.Count; i++)
         {
             float xOff = prnGenerator.Next(-100000, 100000) + xOffSet;
-            float yOff = prnGenerator.Next(-100000, 100000) + yOffSet;
+            float yOff = prnGenerator.Next(-100000, 100000) - yOffSet;
             randomOffsets[i] = new Vector2(xOff, yOff);
         }
 
         return randomOffsets;
     }
 
-    public static float[,] CreateNoiseMap(int width, int height, int seed, Vector2 offset, float scale, 
-        List<Octave> octaves)
+    public static float[,] CreateNoiseMap(int width, int height, int seed, Vector2 offset, float scale,
+        List<Octave> octaves, NormalizeMode normalizeMode)
     {
         float[,] noiseMap = new float[width, height];
         Vector2[] randomOffsets = GenerateRandomOffsets(seed, octaves, offset.x, offset.y);
@@ -48,23 +49,32 @@ public class Noise
             scale = 0.0001f;
         }
 
-        float maxElevation = float.MinValue;
-        float minElevation = float.MaxValue;
+        float maxPossibleHeight = 0f;
+        float amplitude = octaves[0].amplitude;
+        float gain = octaves[1].amplitude / octaves[0].amplitude;
+
+        for (int i = 0; i < octaves.Count; i++)
+        {
+            maxPossibleHeight += amplitude;
+            amplitude *= gain;
+        }
 
 
+        float maxLocalElevation = float.MinValue;
+        float minLocalElevation = float.MaxValue;
 
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
             {
                 float elevation = CalculateElevation(x, y, randomOffsets, octaves, width, height, scale);
-                if (elevation > maxElevation)
+                if (elevation > maxLocalElevation)
                 {
-                    maxElevation = elevation;
+                    maxLocalElevation = elevation;
                 }
-                else if (elevation < minElevation)
+                else if (elevation < minLocalElevation)
                 {
-                    minElevation = elevation;
+                    minLocalElevation = elevation;
                 }
                 noiseMap[x, y] = elevation;
             }
@@ -75,7 +85,15 @@ public class Noise
         {
             for (int x = 0; x < width; x++)
             {
-                noiseMap[x, y] = Mathf.InverseLerp(minElevation, maxElevation, noiseMap[x, y]);
+                if(normalizeMode == NormalizeMode.Local)
+                {
+                    noiseMap[x, y] = Mathf.InverseLerp(minLocalElevation, maxLocalElevation, noiseMap[x, y]);
+                }
+                else
+                {
+                    float normalizedHeight = (noiseMap[x, y] + 1) / (2f * maxPossibleHeight / 1.8f);
+                    noiseMap[x, y] = Mathf.Clamp(normalizedHeight, 0, int.MaxValue);
+                }
             }
         }
 
