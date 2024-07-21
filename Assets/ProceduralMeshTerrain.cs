@@ -36,16 +36,22 @@ public class ProceduralMeshTerrain : MonoBehaviour
 
     public AnimationCurve regionHeightCurve;
 
-    Vector3[] vertices;
-    int[] triangles;
-    Vector2[] uvs;
+    public bool useFalloff;
+    public bool useThreading;
+
     float[,] noiseMap;
+    float[,] falloffMap;
     Texture2D noiseMapTexture;
 
     ConcurrentQueue<MapThreadInfo<float[,]>> mapThreadInfos = new ConcurrentQueue<MapThreadInfo<float[,]>>();
     ConcurrentQueue<MapThreadInfo<MeshData>> meshThreadInfos = new ConcurrentQueue<MapThreadInfo<MeshData>>();
 
     //public AllRequestParams allParams;
+
+    private void Awake()
+    {
+        falloffMap = FallOffGenerator.GenerateFalloffMap(mapChunkSize);
+    }
 
     void Start()
     {
@@ -58,41 +64,45 @@ public class ProceduralMeshTerrain : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //allParams = CreateAllRequestParams();
-        //octaves = OctaveGenerator.GenerateOctaves(octaveCount, gain, startAmplitude, startFrequency, lacunarity);
-        //noiseMap = Noise.CreateNoiseMap(mapChunkSize, mapChunkSize, seed, new Vector2(xOffSet, yOffSet), scale, octaves);
-
-        if (mapThreadInfos.Count > 0)
+        if(useThreading)
         {
-            for (int i = 0; i < mapThreadInfos.Count; i++)
+            if (mapThreadInfos.Count > 0)
             {
-                MapThreadInfo<float[,]> threadInfo;
-                bool isDequeued = mapThreadInfos.TryDequeue(out threadInfo);
-                if(isDequeued)
+                for (int i = 0; i < mapThreadInfos.Count; i++)
                 {
-                    threadInfo.callback(threadInfo.parameter); //parameter is the noiseMap
+                    MapThreadInfo<float[,]> threadInfo;
+                    bool isDequeued = mapThreadInfos.TryDequeue(out threadInfo);
+                    if (isDequeued)
+                    {
+                        threadInfo.callback(threadInfo.parameter); //parameter is the noiseMap
+                    }
+                }
+            }
+
+            if (meshThreadInfos.Count > 0)
+            {
+                for (int i = 0; i < meshThreadInfos.Count; i++)
+                {
+                    MapThreadInfo<MeshData> threadInfo;
+                    bool isDequeued = meshThreadInfos.TryDequeue(out threadInfo);
+                    if (isDequeued)
+                    {
+                        threadInfo.callback(threadInfo.parameter);
+                    }
                 }
             }
         }
-
-        //MeshData meshData = MeshGenerator.GenerateMeshData(noiseMap, levelOfDetail, regions, regionHeightCurve, depth);
-        //MeshGenerator.CreateMesh(mesh, meshData);
-
-        if (meshThreadInfos.Count > 0)
+        else
         {
-            for (int i = 0; i < meshThreadInfos.Count; i++)
-            {
-                MapThreadInfo<MeshData> threadInfo;
-                bool isDequeued = meshThreadInfos.TryDequeue(out threadInfo);
-                if (isDequeued)
-                {
-                    threadInfo.callback(threadInfo.parameter);
-                }
-            }
+            octaves = OctaveGenerator.GenerateOctaves(octaveCount, gain, startAmplitude, startFrequency, lacunarity);
+            noiseMap = Noise.CreateNoiseMap(mapChunkSize, mapChunkSize, seed, new Vector2(xOffSet, yOffSet), scale, 
+                octaves, Noise.NormalizeMode.Local, falloffMap, useFalloff);
+            MeshData meshData = MeshGenerator.GenerateMeshData(noiseMap, previewLOD, regions, regionHeightCurve, depth);
+            MeshGenerator.CreateMesh(mesh, meshData);
+            CreateNoiseMapTexture();       
+            SetShaderGraphVariables();
         }
 
-        //CreateNoiseMapTexture();       
-        //SetShaderGraphVariables();
     }
 
     private void OnValidate()
@@ -137,7 +147,7 @@ public class ProceduralMeshTerrain : MonoBehaviour
     {
         List<Octave> octaves = OctaveGenerator.GenerateOctaves(octaveCount, gain, startAmplitude,startFrequency, lacunarity);
         float[,] noiseMap = Noise.CreateNoiseMap(mapChunkSize, mapChunkSize, seed, center + new Vector2(xOffSet, yOffSet), 
-            scale, octaves, Noise.NormalizeMode.Global);
+            scale, octaves, Noise.NormalizeMode.Global, falloffMap, useFalloff);
 
         //lock the threadInfoQueue to prevent multiple threads from accessing it at the same time
         lock (mapThreadInfos)
