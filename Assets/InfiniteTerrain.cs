@@ -12,14 +12,19 @@ public class InfiniteTerrain : MonoBehaviour
     int chunkSize;
     int chunksVisibleInViewDistance;
 
+    public Material testMaterial;
+
     //to keep track of the terrain chunks and prevent duplicates
     Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new Dictionary<Vector2, TerrainChunk>();
     List<TerrainChunk> lastVisibleTerrainChunks = new List<TerrainChunk>();
+
+    static ProceduralMeshTerrain meshTerrainGenerator;
 
     void Start()
     {
         chunkSize = ProceduralMeshTerrain.mapChunkSize - 1; //because the mesh size is 1 less than the map size
         chunksVisibleInViewDistance = Mathf.RoundToInt(maxViewDistance / chunkSize);
+        meshTerrainGenerator = GetComponent<ProceduralMeshTerrain>();
     }
 
     // Update is called once per frame
@@ -58,7 +63,10 @@ public class InfiniteTerrain : MonoBehaviour
                 }
                 else
                 {
-                    terrainChunkDictionary.Add(viewedChunkCoord, new TerrainChunk(viewedChunkCoord, chunkSize, transform));
+                    terrainChunkDictionary.Add(
+                        viewedChunkCoord, 
+                        new TerrainChunk(viewedChunkCoord, chunkSize, transform, testMaterial)
+                        );
                 }
             }
         }
@@ -70,18 +78,34 @@ public class InfiniteTerrain : MonoBehaviour
         Vector2 position;
         Bounds bounds;
 
-        public TerrainChunk(Vector2 coord, int size, Transform parent)
+        MeshRenderer meshRenderer;
+        MeshFilter meshFilter;
+
+        public TerrainChunk(Vector2 coord, int size, Transform parent, Material material)
         {
             position = coord * size;
             bounds = new Bounds(position, Vector2.one * size);
             Vector3 positionV3 = new Vector3(position.x, 0, position.y);
-            meshObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
-            meshObject.transform.position = positionV3;
+            meshObject = new GameObject("Terrain Chunk");
+            meshRenderer = meshObject.AddComponent<MeshRenderer>();
+            meshFilter = meshObject.AddComponent<MeshFilter>();
+            meshRenderer.material = material;
 
-            //divide by 10f to scale the plane (default plane size is 10x10)
-            meshObject.transform.localScale = Vector3.one * size / 10f;
+            meshObject.transform.position = positionV3;
             meshObject.transform.parent = parent;
             SetVisible(false);
+
+            meshTerrainGenerator.RequestMapData(OnMapDataReceived);
+        }
+
+        void OnMapDataReceived(float[,] noiseMap)
+        {
+            meshTerrainGenerator.RequestMeshData(noiseMap, OnMeshDataReceived);
+        }
+
+        void OnMeshDataReceived(MeshData meshData)
+        {
+             MeshGenerator.CreateMesh(meshFilter.mesh, meshData);
         }
 
         public void UpdateTerrainChunk()

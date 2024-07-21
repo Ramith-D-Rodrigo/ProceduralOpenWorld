@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using UnityEngine;
 
 public class ProceduralMeshTerrain : MonoBehaviour
@@ -40,6 +42,11 @@ public class ProceduralMeshTerrain : MonoBehaviour
     float[,] noiseMap;
     Texture2D noiseMapTexture;
 
+    ConcurrentQueue<MapThreadInfo<float[,]>> mapThreadInfos = new ConcurrentQueue<MapThreadInfo<float[,]>>();
+    ConcurrentQueue<MapThreadInfo<MeshData>> meshThreadInfos = new ConcurrentQueue<MapThreadInfo<MeshData>>();
+
+    //public AllRequestParams allParams;
+
     void Start()
     {
         mesh = new Mesh();
@@ -51,12 +58,41 @@ public class ProceduralMeshTerrain : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        octaves = OctaveGenerator.GenerateOctaves(octaveCount, gain, startAmplitude, startFrequency, lacunarity);
-        noiseMap = Noise.CreateNoiseMap(mapChunkSize, mapChunkSize, seed, new Vector2(xOffSet, yOffSet), scale, octaves);
-        CreateNoiseMapTexture();       
-        CreateVerticesAndTriangles();
-        SetShaderGraphVariables();
-        CreateMesh();
+        //allParams = CreateAllRequestParams();
+        //octaves = OctaveGenerator.GenerateOctaves(octaveCount, gain, startAmplitude, startFrequency, lacunarity);
+        //noiseMap = Noise.CreateNoiseMap(mapChunkSize, mapChunkSize, seed, new Vector2(xOffSet, yOffSet), scale, octaves);
+
+        if (mapThreadInfos.Count > 0)
+        {
+            for (int i = 0; i < mapThreadInfos.Count; i++)
+            {
+                MapThreadInfo<float[,]> threadInfo;
+                bool isDequeued = mapThreadInfos.TryDequeue(out threadInfo);
+                if(isDequeued)
+                {
+                    threadInfo.callback(threadInfo.parameter); //parameter is the noiseMap
+                }
+            }
+        }
+
+        //MeshData meshData = MeshGenerator.GenerateMeshData(noiseMap, levelOfDetail, regions, regionHeightCurve, depth);
+        //MeshGenerator.CreateMesh(mesh, meshData);
+
+        if (meshThreadInfos.Count > 0)
+        {
+            for (int i = 0; i < meshThreadInfos.Count; i++)
+            {
+                MapThreadInfo<MeshData> threadInfo;
+                bool isDequeued = meshThreadInfos.TryDequeue(out threadInfo);
+                if (isDequeued)
+                {
+                    threadInfo.callback(threadInfo.parameter);
+                }
+            }
+        }
+
+        //CreateNoiseMapTexture();       
+        //SetShaderGraphVariables();
     }
 
     private void OnValidate()
@@ -64,50 +100,6 @@ public class ProceduralMeshTerrain : MonoBehaviour
         if (octaveCount < 1)
         {
             octaveCount = 1;
-        }
-    }
-
-    private void CreateVerticesAndTriangles()
-    {
-        int width = noiseMap.GetLength(0);
-        int height = noiseMap.GetLength(1);
-
-        int levelOfDetailSimplicationIndex = (levelOfDetail == 0) ?  1 : levelOfDetail * 2;
-        int vertPerLine = (width - 1) / levelOfDetailSimplicationIndex + 1;
-
-        vertices = new Vector3[vertPerLine * vertPerLine];
-        triangles = new int[(vertPerLine - 1) * (vertPerLine - 1) * 6];
-        uvs = new Vector2[vertPerLine * vertPerLine];
-
-        int vertIndex = 0;
-        int triIndex = 0;
-
-        for (int z = 0; z < height; z+= levelOfDetailSimplicationIndex)
-        {
-            for (int x = 0; x < width; x+= levelOfDetailSimplicationIndex)
-            {
-                float finalElevation = noiseMap[x, z];
-                if (regions != null && regions.Count > 0)
-                {
-                    finalElevation = regionHeightCurve.Evaluate(finalElevation);
-                }
-                vertices[vertIndex] = new Vector3(x, finalElevation * depth, z);
-                uvs[vertIndex] = new Vector2(x /(float)width, z /(float)height);
-
-                if(x < width - 1 && z < height - 1)
-                {
-                    triangles[triIndex] = vertIndex;
-                    triangles[triIndex + 1] = vertIndex + vertPerLine;
-                    triangles[triIndex + 2] = vertIndex + 1;
-
-                    triangles[triIndex + 3] = vertIndex + 1;
-                    triangles[triIndex + 4] = vertIndex + vertPerLine;
-                    triangles[triIndex + 5] = vertIndex + vertPerLine + 1;
-
-                    triIndex += 6;
-                }
-                vertIndex++;
-            }
         }
     }
 
@@ -130,12 +122,103 @@ public class ProceduralMeshTerrain : MonoBehaviour
         }
     }
 
-    private void CreateMesh()
+    public void RequestMapData(Action<float[,]> callBack)
     {
-        mesh.Clear();
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-        mesh.uv = uvs;
-        mesh.RecalculateNormals();
+        ThreadStart threadStart = delegate
+        {
+            MapDataThread(callBack);
+        };
+
+        new Thread(threadStart).Start();
     }
+
+    //runs on a different thread
+    void MapDataThread(Action<float[,]> callBack)
+    {
+        List<Octave> octaves = OctaveGenerator.GenerateOctaves(octaveCount, gain, startAmplitude,startFrequency, lacunarity);
+
+        float[,] noiseMap = Noise.CreateNoiseMap(mapChunkSize, mapChunkSize, seed, new Vector2(xOffSet, yOffSet), scale, octaves);
+
+        //lock the threadInfoQueue to prevent multiple threads from accessing it at the same time
+        lock (mapThreadInfos)
+        {
+            mapThreadInfos.Enqueue(new MapThreadInfo<float[,]>(callBack, noiseMap));
+        }
+    }
+
+    public void RequestMeshData(float[,] noiseMap, Action<MeshData> callBack)
+    {
+        ThreadStart threadStart = delegate
+        {
+            MeshDataThread(noiseMap, callBack);
+        };
+
+        new Thread(threadStart).Start();
+    }
+
+    void MeshDataThread(float[,] noiseMap, Action<MeshData> callBack)
+    {
+        MeshData meshData = MeshGenerator.GenerateMeshData(noiseMap, levelOfDetail, regions, regionHeightCurve, depth);
+
+        lock (meshThreadInfos)
+        {
+            meshThreadInfos.Enqueue(new MapThreadInfo<MeshData>(callBack, meshData));
+        }
+    }
+
+    struct MapThreadInfo<T> {
+        public readonly Action<T> callback;
+        public readonly T parameter;
+
+        public MapThreadInfo(Action<T> callback, T parameter)
+        {
+            this.callback = callback;
+            this.parameter = parameter;
+        }
+    }
+
+
+ /*   private AllRequestParams CreateAllRequestParams()
+    {
+        MapRequestParams mapRequestParams = new MapRequestParams
+        {
+            chunkSize = mapChunkSize,
+            seed = seed,
+            offset = new Vector2(xOffSet, yOffSet),
+            scale = scale,
+            octaveCount = octaveCount,
+            gain = gain,
+            startAmplitude = startAmplitude,
+            startFrequency = startFrequency,
+            lacunarity = lacunarity
+        };
+
+        MeshRequestParams meshRequestParams = new MeshRequestParams
+        {
+            levelOfDetail = levelOfDetail,
+            regions = regions,
+            regionHeightCurve = regionHeightCurve,
+            depth = depth
+        };
+
+        AllRequestParams allRequestParams = new AllRequestParams
+        {
+            mapRequestParams = mapRequestParams,
+            meshRequestParams = meshRequestParams
+        };
+
+        return allRequestParams;
+    }*/
 }
+
+/*public struct AllRequestParams
+{
+    public MapRequestParams mapRequestParams;
+    public MeshRequestParams meshRequestParams;
+
+    public AllRequestParams(MapRequestParams mapRequestParams, MeshRequestParams meshRequestParams)
+    {
+        this.mapRequestParams = mapRequestParams;
+        this.meshRequestParams = meshRequestParams;
+    }
+}*/
