@@ -764,6 +764,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  useFalloff: 1
+  useThreading: 1
 --- !u!23 &1604119313
 MeshRenderer:
   m_ObjectHideFlags: 0
