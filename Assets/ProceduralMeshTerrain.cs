@@ -136,8 +136,7 @@ public class ProceduralMeshTerrain : MonoBehaviour
     void MapDataThread(Vector2 center, Action<float[,]> callBack)
     {
         List<Octave> octaves = OctaveGenerator.GenerateOctaves(octaveCount, gain, startAmplitude,startFrequency, lacunarity);
-
-        float[,] noiseMap = Noise.CreateNoiseMap(mapChunkSize, mapChunkSize, seed, new Vector2(xOffSet, yOffSet), scale, octaves, center);
+        float[,] noiseMap = Noise.CreateNoiseMap(mapChunkSize, mapChunkSize, seed, center + new Vector2(xOffSet, yOffSet), scale, octaves);
 
         //lock the threadInfoQueue to prevent multiple threads from accessing it at the same time
         lock (mapThreadInfos)

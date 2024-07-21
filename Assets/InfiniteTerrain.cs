@@ -126,7 +126,6 @@ public class InfiniteTerrain : MonoBehaviour
             hasReceivedMapData = true;
 
             //create the texture for noise map
-            Debug.Log(noiseMap.GetLength(0) + " " + noiseMap.GetLength(1));
             Texture2D noiseMapTexture = new Texture2D(noiseMap.GetLength(0), noiseMap.GetLength(1));
             Color[] colors = TextureGenerator.CreateColorMap(noiseMap.GetLength(0), noiseMap.GetLength(1), 
                 noiseMap, Color.black, Color.white);
@@ -134,12 +133,12 @@ public class InfiniteTerrain : MonoBehaviour
             noiseMapTexture.Apply();
 
             //then update the shader graph 
-            meshRenderer.sharedMaterial.SetTexture("_HeightMap", noiseMapTexture);
+            meshRenderer.material.SetTexture("_HeightMap", noiseMapTexture);
 
             //region heights
             for (int i = 0; i < meshTerrainGenerator.regions.Count; i++)
             {
-                meshRenderer.sharedMaterial.SetFloat("_" + meshTerrainGenerator.regions[i].regionName + "Height", 
+                meshRenderer.material.SetFloat("_" + meshTerrainGenerator.regions[i].regionName + "Height", 
                     meshTerrainGenerator.regions[i].height);
             }
 

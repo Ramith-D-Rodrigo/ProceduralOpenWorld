@@ -38,9 +38,8 @@ public class Noise
     }
 
     public static float[,] CreateNoiseMap(int width, int height, int seed, Vector2 offset, float scale, 
-        List<Octave> octaves, Vector2 center)
+        List<Octave> octaves)
     {
-        offset = new Vector2(center.x + offset.x, center.y + offset.y);
         float[,] noiseMap = new float[width, height];
         Vector2[] randomOffsets = GenerateRandomOffsets(seed, octaves, offset.x, offset.y);
 
