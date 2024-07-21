@@ -44,7 +44,7 @@ public class TextureGenerator : MonoBehaviour
     public void GenerateTexture()
     {
         List<Octave> octaves = OctaveGenerator.GenerateOctaves(octaveCount, gain, startAmplitude, startFrequency, lacunarity);
-        texture = GenerateTextureByTerrainType(width, height, type, xOffSet, yOffSet, octaves, scale);
+        texture = GenerateTextureByTerrainType(width, height, type, xOffSet, yOffSet, octaves, scale, Vector2.zero);
         meshRenderer.sharedMaterial.mainTexture = texture;
 
     }
@@ -57,10 +57,10 @@ public class TextureGenerator : MonoBehaviour
 
     // this is a util function to generate a texture based on the terrain type
     public static Texture2D GenerateTextureByTerrainType(int width, int height, TerrainType terrainType, float xOffset, 
-        float yOffset, List<Octave> octaves, float scale)
+        float yOffset, List<Octave> octaves, float scale, Vector2 center)
     {
         Texture2D texture = new(width, height);
-        float[,] noiseMap = Noise.CreateNoiseMap(width, height, 0, new Vector2(xOffset, yOffset), scale, octaves);
+        float[,] noiseMap = Noise.CreateNoiseMap(width, height, 0, new Vector2(xOffset, yOffset), scale, octaves, center);
         Color[] colorMap = CreateColorMap(width, height, noiseMap, terrainType.lowColor, terrainType.highColor);
 
         texture.SetPixels(colorMap);
