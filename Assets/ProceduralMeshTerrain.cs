@@ -41,6 +41,10 @@ public class ProceduralMeshTerrain : MonoBehaviour
     public Noise.NormalizeMode normalizeMode;
     public float normalizeDividngFactor;
 
+    //water prefab
+    public GameObject waterPrefab;
+    private GameObject water;
+
     float[,] noiseMap;
     float[,] falloffMap;
     Texture2D noiseMapTexture;
@@ -61,6 +65,7 @@ public class ProceduralMeshTerrain : MonoBehaviour
         meshFilter = GetComponent<MeshFilter>();
         meshRenderer = GetComponent<MeshRenderer>();
         meshFilter.mesh = mesh;
+        water = null;
     }
 
     // Update is called once per frame
@@ -96,13 +101,19 @@ public class ProceduralMeshTerrain : MonoBehaviour
         }
         else
         {
-            noiseMap = GenerateMapData(Vector2.zero, normalizeMode);
-            MeshData meshData = MeshGenerator.GenerateMeshData(noiseMap, previewLOD, regions, regionHeightCurve, depth);
-            MeshGenerator.CreateMesh(mesh, meshData);
-            CreateNoiseMapTexture();       
-            SetShaderGraphVariables();
+            GenerateCompleteMap();
         }
 
+    }
+
+    private void GenerateCompleteMap()
+    {
+        noiseMap = GenerateMapData(Vector2.zero, normalizeMode);
+        MeshData meshData = MeshGenerator.GenerateMeshData(noiseMap, previewLOD, regions, regionHeightCurve, depth);
+        MeshGenerator.CreateMesh(mesh, meshData);
+        CreateNoiseMapTexture();
+        SetShaderGraphVariables();
+        CreateOrEditWater();
     }
 
     private void OnValidate()
@@ -140,6 +151,47 @@ public class ProceduralMeshTerrain : MonoBehaviour
             meshRenderer.sharedMaterial.SetFloat("_" + regions[i].regionName + "Height", regions[i].height);
         }
     }
+
+    public static GameObject CreateWater(Vector2 boundSizes, GameObject waterPrefab, AnimationCurve regionHeightCurve, 
+        Transform parent)
+    {
+            Vector3 waterPosition = Vector3.zero;
+            waterPosition = GetWaterPosition(waterPosition, regionHeightCurve);
+
+            //create the water
+            GameObject water = Instantiate(waterPrefab, parent, false);
+            water.transform.localPosition = waterPosition;
+            //scale it to the size of the map and divide by 10 to make it smaller
+            water.transform.localScale = new Vector3((boundSizes.x + 1) / 10.0f, 1, 
+                (boundSizes.y + 1) / 10.0f);
+            return water;
+    }
+
+
+    private static Vector3 GetWaterPosition(Vector3 waterPosition, AnimationCurve regionHeightCurve)
+    {
+        //get the water ending height from the regions
+        //in the current implementation, 3rd key is where the water ends
+        waterPosition.y = regionHeightCurve.keys[2].time * 10;
+        return waterPosition;
+    }
+
+    void CreateOrEditWater()
+    {
+        if(water == null)
+        {
+            Vector2 boundSizes = new Vector2(mapChunkSize, mapChunkSize);
+            water = CreateWater(boundSizes, waterPrefab, regionHeightCurve, this.transform);
+        }
+        else
+        {
+            // change the water position to the new map position
+            Vector3 waterPosition = this.transform.position;
+            waterPosition = GetWaterPosition(waterPosition, regionHeightCurve);
+            water.transform.position = waterPosition;
+        }
+    }
+
 
     public void RequestMapData(Vector2 center, Action<float[,]> callBack)
     {

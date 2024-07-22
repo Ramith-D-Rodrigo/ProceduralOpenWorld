@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class InfiniteTerrain : MonoBehaviour
@@ -15,6 +16,8 @@ public class InfiniteTerrain : MonoBehaviour
     Vector2 prevViewerPosition;
     const float viewerPositionOffsetToUpdateChunks = 25f;
     float sqrViewerPositionOffsetToUpdateChunks = Mathf.Pow(viewerPositionOffsetToUpdateChunks, 2);
+
+    public GameObject waterPrefab;
 
     int chunkSize;
     int chunksVisibleInViewDistance;
@@ -87,7 +90,8 @@ public class InfiniteTerrain : MonoBehaviour
                 {
                     terrainChunkDictionary.Add(
                         viewedChunkCoord, 
-                        new TerrainChunk(viewedChunkCoord, chunkSize, detailLevels, transform, testMaterial, scale)
+                        new TerrainChunk(viewedChunkCoord, chunkSize, detailLevels, transform, testMaterial, scale, 
+                        meshTerrainGenerator.regionHeightCurve, waterPrefab)
                         );
                 }
             }
@@ -108,12 +112,15 @@ public class InfiniteTerrain : MonoBehaviour
         LODMesh[] lodMeshes;
         LODMesh collisionLODMesh;
 
+        GameObject water;
+
         float[,] noiseMap;
         bool hasReceivedMapData;
 
         int previousLODIndex = -1;
 
-        public TerrainChunk(Vector2 coord, int size,LODInfo[] LODDetails, Transform parent, Material material, float scale)
+        public TerrainChunk(Vector2 coord, int size,LODInfo[] LODDetails, Transform parent, Material material, float scale, 
+            AnimationCurve regionHeightCurve, GameObject waterPrefab)
         {
             detailLevels = LODDetails;
             position = coord * size;
@@ -128,6 +135,10 @@ public class InfiniteTerrain : MonoBehaviour
             meshObject.transform.position = positionV3 * scale;
             meshObject.transform.parent = parent;
             meshObject.transform.localScale = Vector3.one * scale;
+
+            Vector2 boundSizes = new Vector2(size, size);
+
+            water = ProceduralMeshTerrain.CreateWater(boundSizes, waterPrefab, regionHeightCurve, meshObject.transform);
             SetVisible(false);
 
             lodMeshes = new LODMesh[detailLevels.Length];
@@ -251,6 +262,10 @@ public class InfiniteTerrain : MonoBehaviour
         public bool hasReceivedMesh;
         int levelOfDetail;
         Action updateCallback;
+        GameObject waterPrefab;
+        AnimationCurve regionHeightCurve;
+        Transform parent;
+        GameObject water;
         public LODMesh(int levelOfDetail, Action callback)
         {
             mesh = new Mesh();
