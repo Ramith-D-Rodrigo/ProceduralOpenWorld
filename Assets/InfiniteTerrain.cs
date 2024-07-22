@@ -7,15 +7,15 @@ public class InfiniteTerrain : MonoBehaviour
 {
     public float scale = 1f;
 
-    const float viewerPositionOffsetToUpdateChunks = 25f;
-    float sqrViewerPositionOffsetToUpdateChunks = Mathf.Pow(viewerPositionOffsetToUpdateChunks, 2);
-    Vector2 prevViewerPosition;
-
     public static float maxViewDistance;
     public LODInfo[] detailLevels;
 
     public Transform viewer;
     public static Vector2 viewerPosition;
+    Vector2 prevViewerPosition;
+    const float viewerPositionOffsetToUpdateChunks = 25f;
+    float sqrViewerPositionOffsetToUpdateChunks = Mathf.Pow(viewerPositionOffsetToUpdateChunks, 2);
+
     int chunkSize;
     int chunksVisibleInViewDistance;
 
@@ -29,11 +29,18 @@ public class InfiniteTerrain : MonoBehaviour
 
     void Start()
     {
+        meshTerrainGenerator = GetComponent<ProceduralMeshTerrain>();
+        if (!meshTerrainGenerator.useThreading)
+        {
+            return;
+        }
+
         maxViewDistance = detailLevels[detailLevels.Length - 1].visibleDistThreshold;
 
         chunkSize = ProceduralMeshTerrain.mapChunkSize - 1; //because the mesh size is 1 less than the map size
         chunksVisibleInViewDistance = Mathf.RoundToInt(maxViewDistance / chunkSize);
-        meshTerrainGenerator = GetComponent<ProceduralMeshTerrain>();
+
+        prevViewerPosition = viewerPosition;
 
         UpdateVisibleChunks();
     }
@@ -41,8 +48,14 @@ public class InfiniteTerrain : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!meshTerrainGenerator.useThreading)
+        {
+            return;
+        }
+
         viewerPosition = new Vector2(viewer.position.x, viewer.position.z) / scale;
-        if((prevViewerPosition - viewerPosition).sqrMagnitude > sqrViewerPositionOffsetToUpdateChunks)
+        float viewerPositionOffset = (prevViewerPosition - viewerPosition).sqrMagnitude;
+        if(viewerPositionOffset > sqrViewerPositionOffsetToUpdateChunks)
         {
             prevViewerPosition = viewerPosition;
             UpdateVisibleChunks();
@@ -89,9 +102,11 @@ public class InfiniteTerrain : MonoBehaviour
 
         MeshRenderer meshRenderer;
         MeshFilter meshFilter;
+        MeshCollider meshCollider;
 
         LODInfo[] detailLevels;
         LODMesh[] lodMeshes;
+        LODMesh collisionLODMesh;
 
         float[,] noiseMap;
         bool hasReceivedMapData;
@@ -107,7 +122,8 @@ public class InfiniteTerrain : MonoBehaviour
             meshObject = new GameObject("Terrain Chunk");
             meshRenderer = meshObject.AddComponent<MeshRenderer>();
             meshFilter = meshObject.AddComponent<MeshFilter>();
-            meshRenderer.sharedMaterial = material;
+            meshCollider = meshObject.AddComponent<MeshCollider>();
+            meshRenderer.material = material;
 
             meshObject.transform.position = positionV3 * scale;
             meshObject.transform.parent = parent;
@@ -118,6 +134,10 @@ public class InfiniteTerrain : MonoBehaviour
             for(int i = 0; i < detailLevels.Length; i++)
             {
                 lodMeshes[i] = new LODMesh(detailLevels[i].levelOfDetail, UpdateTerrainChunk);
+                if(detailLevels[i].useForCollider)
+                {
+                    collisionLODMesh = lodMeshes[i];
+                }
             }
 
             meshTerrainGenerator.RequestMapData(position, OnMapDataReceived);
@@ -189,6 +209,24 @@ public class InfiniteTerrain : MonoBehaviour
                         lodMesh.RequestMeshData(noiseMap);
                     }
                 }
+
+                if (lodIndex == 0)  //only add the collider for the lowest level of detail (highest resolution)
+                {
+                    if (collisionLODMesh.hasReceivedMesh)
+                    {
+                        meshCollider.sharedMesh = collisionLODMesh.mesh;
+                    }
+                    else if (!collisionLODMesh.hasRequestedMesh)
+                    {
+                        collisionLODMesh.RequestMeshData(noiseMap);
+                    }
+                }
+                else
+                {
+                    //remove the collider if the level of detail is not the highest resolution
+                    meshCollider.sharedMesh = null;
+                }
+
                 lastVisibleTerrainChunks.Add(this);
             }
 
@@ -240,5 +278,7 @@ public class InfiniteTerrain : MonoBehaviour
         public int levelOfDetail;
         public float visibleDistThreshold; //higher the level of detail, the less the mesh has details
         //hence when visibleDistThreshold is reached, max out the level of detail
+
+        public bool useForCollider;
     }
 }
