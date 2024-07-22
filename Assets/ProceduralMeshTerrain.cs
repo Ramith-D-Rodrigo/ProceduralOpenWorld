@@ -8,7 +8,7 @@ using UnityEngine;
 
 public class ProceduralMeshTerrain : MonoBehaviour
 {
-    public const int mapChunkSize = 241;
+    public const int mapChunkSize = 239;
 
     [Range(0,6)]
     public int previewLOD;
@@ -50,7 +50,7 @@ public class ProceduralMeshTerrain : MonoBehaviour
 
     private void Awake()
     {
-        falloffMap = FallOffGenerator.GenerateFalloffMap(mapChunkSize);
+        falloffMap = FallOffGenerator.GenerateFalloffMap(mapChunkSize + 2);
     }
 
     void Start()
@@ -94,9 +94,7 @@ public class ProceduralMeshTerrain : MonoBehaviour
         }
         else
         {
-            octaves = OctaveGenerator.GenerateOctaves(octaveCount, gain, startAmplitude, startFrequency, lacunarity);
-            noiseMap = Noise.CreateNoiseMap(mapChunkSize, mapChunkSize, seed, new Vector2(xOffSet, yOffSet), scale, 
-                octaves, Noise.NormalizeMode.Local, falloffMap, useFalloff);
+            noiseMap = GenerateMapData(Vector2.zero, Noise.NormalizeMode.Local);
             MeshData meshData = MeshGenerator.GenerateMeshData(noiseMap, previewLOD, regions, regionHeightCurve, depth);
             MeshGenerator.CreateMesh(mesh, meshData);
             CreateNoiseMapTexture();       
@@ -111,6 +109,15 @@ public class ProceduralMeshTerrain : MonoBehaviour
         {
             octaveCount = 1;
         }
+    }
+
+    float[,] GenerateMapData(Vector2 center, Noise.NormalizeMode normalizeMode)
+    {
+        octaves = OctaveGenerator.GenerateOctaves(octaveCount, gain, startAmplitude, startFrequency, lacunarity);
+        //+2 to account for the border vertices
+        float[,] noiseMap = Noise.CreateNoiseMap(mapChunkSize + 2, mapChunkSize + 2, seed, center + new Vector2(xOffSet, yOffSet),
+            scale, octaves, normalizeMode, falloffMap, useFalloff);
+        return noiseMap;
     }
 
     private void CreateNoiseMapTexture()
@@ -145,9 +152,7 @@ public class ProceduralMeshTerrain : MonoBehaviour
     //runs on a different thread
     void MapDataThread(Vector2 center, Action<float[,]> callBack)
     {
-        List<Octave> octaves = OctaveGenerator.GenerateOctaves(octaveCount, gain, startAmplitude,startFrequency, lacunarity);
-        float[,] noiseMap = Noise.CreateNoiseMap(mapChunkSize, mapChunkSize, seed, center + new Vector2(xOffSet, yOffSet), 
-            scale, octaves, Noise.NormalizeMode.Global, falloffMap, useFalloff);
+        float[,] noiseMap = GenerateMapData(center, Noise.NormalizeMode.Global);
 
         //lock the threadInfoQueue to prevent multiple threads from accessing it at the same time
         lock (mapThreadInfos)
