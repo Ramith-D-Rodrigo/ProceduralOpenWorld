@@ -147,10 +147,10 @@ public class InfiniteTerrain : MonoBehaviour
         {
             this.noiseMap = noiseMap;
             hasReceivedMapData = true;
-
             //create the texture for noise map
-            Texture2D noiseMapTexture = new Texture2D(noiseMap.GetLength(0), noiseMap.GetLength(1));
-            Color[] colors = TextureGenerator.CreateColorMap(noiseMap.GetLength(0), noiseMap.GetLength(1), 
+            int size = ProceduralMeshTerrain.mapChunkSize + 2;
+            Texture2D noiseMapTexture = new Texture2D(size, size);
+            Color[] colors = TextureGenerator.CreateColorMap(size, size, 
                 noiseMap, Color.black, Color.white);
             noiseMapTexture.SetPixels(colors);
             noiseMapTexture.Apply();

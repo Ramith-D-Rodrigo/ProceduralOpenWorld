@@ -113,7 +113,7 @@ Material:
     - _DstBlend: 0
     - _EmissionEnabled: 0
     - _FlipbookMode: 0
-    - _ForestHeight: 0.4
+    - _ForestHeight: 0.5
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
@@ -121,7 +121,7 @@ Material:
     - _LightingEnabled: 0
     - _Metallic: 0
     - _Mode: 0
-    - _MudHeight: 0.7
+    - _MudHeight: 0.75
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0

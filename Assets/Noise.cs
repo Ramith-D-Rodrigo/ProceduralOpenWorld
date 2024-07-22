@@ -39,7 +39,7 @@ public class Noise
     }
 
     public static float[,] CreateNoiseMap(int width, int height, int seed, Vector2 offset, float scale,
-        List<Octave> octaves, NormalizeMode normalizeMode, float[,] fallOffMap, bool useFalloff)
+        List<Octave> octaves, NormalizeMode normalizeMode, float normalizeDividngFactor, float[,] fallOffMap, bool useFalloff)
     {
         float[,] noiseMap = new float[width, height];
         Vector2[] randomOffsets = GenerateRandomOffsets(seed, octaves, offset.x, offset.y);
@@ -91,7 +91,12 @@ public class Noise
                 }
                 else
                 {
-                    float normalizedHeight = (noiseMap[x, y] + 1) / (2f * maxPossibleHeight / 1.8f);
+                    if(normalizeDividngFactor == 0.0f)
+                    {
+
+                       normalizeDividngFactor = 0.0001f;
+                    }
+                    float normalizedHeight = (noiseMap[x, y] + 1) / (2f * maxPossibleHeight / normalizeDividngFactor);
                     noiseMap[x, y] = Mathf.Clamp(normalizedHeight, 0, int.MaxValue);
                 }
 

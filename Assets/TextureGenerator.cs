@@ -61,7 +61,7 @@ public class TextureGenerator : MonoBehaviour
     {
         Texture2D texture = new(width, height);
         float[,] noiseMap = Noise.CreateNoiseMap(width, height, 0, center + new Vector2(xOffset, yOffset), scale, 
-            octaves, Noise.NormalizeMode.Local, new float[0,0], false);
+            octaves, Noise.NormalizeMode.Local, 0.1f, new float[0,0], false);
         Color[] colorMap = CreateColorMap(width, height, noiseMap, terrainType.lowColor, terrainType.highColor);
 
         texture.SetPixels(colorMap);

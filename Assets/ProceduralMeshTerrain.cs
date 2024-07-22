@@ -38,6 +38,8 @@ public class ProceduralMeshTerrain : MonoBehaviour
 
     public bool useFalloff;
     public bool useThreading;
+    public Noise.NormalizeMode normalizeMode;
+    public float normalizeDividngFactor;
 
     float[,] noiseMap;
     float[,] falloffMap;
@@ -94,7 +96,7 @@ public class ProceduralMeshTerrain : MonoBehaviour
         }
         else
         {
-            noiseMap = GenerateMapData(Vector2.zero, Noise.NormalizeMode.Local);
+            noiseMap = GenerateMapData(Vector2.zero, normalizeMode);
             MeshData meshData = MeshGenerator.GenerateMeshData(noiseMap, previewLOD, regions, regionHeightCurve, depth);
             MeshGenerator.CreateMesh(mesh, meshData);
             CreateNoiseMapTexture();       
@@ -116,14 +118,14 @@ public class ProceduralMeshTerrain : MonoBehaviour
         octaves = OctaveGenerator.GenerateOctaves(octaveCount, gain, startAmplitude, startFrequency, lacunarity);
         //+2 to account for the border vertices
         float[,] noiseMap = Noise.CreateNoiseMap(mapChunkSize + 2, mapChunkSize + 2, seed, center + new Vector2(xOffSet, yOffSet),
-            scale, octaves, normalizeMode, falloffMap, useFalloff);
+            scale, octaves, normalizeMode, normalizeDividngFactor, falloffMap, useFalloff);
         return noiseMap;
     }
 
     private void CreateNoiseMapTexture()
     {
-        noiseMapTexture = new Texture2D(mapChunkSize, mapChunkSize);
-        Color[] colors = TextureGenerator.CreateColorMap(mapChunkSize, mapChunkSize, noiseMap, Color.black, Color.white);
+        noiseMapTexture = new Texture2D(mapChunkSize + 2, mapChunkSize + 2);
+        Color[] colors = TextureGenerator.CreateColorMap(mapChunkSize + 2, mapChunkSize + 2, noiseMap, Color.black, Color.white);
         noiseMapTexture.SetPixels(colors);
         noiseMapTexture.Apply();
     }
