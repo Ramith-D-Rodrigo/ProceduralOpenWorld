@@ -95,7 +95,7 @@ Material:
     m_Floats:
     - _BUILTIN_QueueControl: 0
     - _BUILTIN_QueueOffset: 0
-    - _BeachHeight: 0.28
+    - _BeachHeight: 0.15
     - _BlendOp: 0
     - _BumpScale: 1
     - _CameraFadingEnabled: 0
@@ -104,7 +104,7 @@ Material:
     - _ColorMode: 0
     - _Cull: 2
     - _Cutoff: 0.5
-    - _DeepWaterHeight: 0.15
+    - _DeepWaterHeight: 0.05
     - _DetailNormalMapScale: 1
     - _DistortionBlend: 0.5
     - _DistortionEnabled: 0
@@ -113,11 +113,11 @@ Material:
     - _DstBlend: 0
     - _EmissionEnabled: 0
     - _FlipbookMode: 0
-    - _ForestHeight: 0.55
+    - _ForestHeight: 0.4
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
-    - _GrassHeight: 0.45
+    - _GrassHeight: 0.3
     - _LightingEnabled: 0
     - _Metallic: 0
     - _Mode: 0
@@ -132,7 +132,7 @@ Material:
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0
-    - _WaterHeight: 0.2
+    - _WaterHeight: 0.1
     - _ZWrite: 1
     m_Colors:
     - _CameraFadeParams: {r: 0, g: Infinity, b: 0, a: 0}
