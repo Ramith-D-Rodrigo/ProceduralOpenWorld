@@ -11,7 +11,13 @@ public class InfiniteTerrain : MonoBehaviour
     public static float maxViewDistance;
     public LODInfo[] detailLevels;
 
-    public Transform viewer;
+    public Transform player;
+    public Transform freeView;
+
+    Transform currentViewTransform;
+
+    bool isInGodMode = false;
+
     public static Vector2 viewerPosition;
     Vector2 prevViewerPosition;
     const float viewerPositionOffsetToUpdateChunks = 25f;
@@ -38,6 +44,8 @@ public class InfiniteTerrain : MonoBehaviour
             return;
         }
 
+        SwitchView();
+
         maxViewDistance = detailLevels[detailLevels.Length - 1].visibleDistThreshold;
 
         chunkSize = ProceduralMeshTerrain.mapChunkSize - 1; //because the mesh size is 1 less than the map size
@@ -56,13 +64,55 @@ public class InfiniteTerrain : MonoBehaviour
             return;
         }
 
-        viewerPosition = new Vector2(viewer.position.x, viewer.position.z) / scale;
+        ProcessUserInput();
+
+        viewerPosition = new Vector2(currentViewTransform.position.x, currentViewTransform.position.z) / scale;
         float viewerPositionOffset = (prevViewerPosition - viewerPosition).sqrMagnitude;
         if(viewerPositionOffset > sqrViewerPositionOffsetToUpdateChunks)
         {
             prevViewerPosition = viewerPosition;
             UpdateVisibleChunks();
         }
+    }
+
+    void ProcessUserInput()
+    {
+        if(Input.GetKeyDown(KeyCode.G))
+        {
+            isInGodMode = !isInGodMode;
+            SwitchView();
+        }
+    }
+
+    void SwitchView()
+    {
+        if (isInGodMode)
+        {
+            currentViewTransform = freeView;
+            player.parent.gameObject.SetActive(false);
+            freeView.gameObject.SetActive(true);
+        }
+        else
+        {
+            currentViewTransform = player;
+            player.parent.gameObject.SetActive(true);
+            freeView.gameObject.SetActive(false);
+
+        }
+    }
+
+    public void OnValuesChanged()
+    {
+        if (!isInGodMode)
+        {
+            return;
+        }
+        
+        foreach(TerrainChunk chunk in terrainChunkDictionary.Values)
+        {
+            chunk.Reset();
+        }
+        UpdateVisibleChunks();
     }
 
     void UpdateVisibleChunks()
@@ -119,7 +169,7 @@ public class InfiniteTerrain : MonoBehaviour
 
         int previousLODIndex = -1;
 
-        public TerrainChunk(Vector2 coord, int size,LODInfo[] LODDetails, Transform parent, Material material, float scale, 
+        public TerrainChunk(Vector2 coord, int size, LODInfo[] LODDetails, Transform parent, Material material, float scale, 
             AnimationCurve regionHeightCurve, GameObject waterPrefab)
         {
             detailLevels = LODDetails;
@@ -149,6 +199,20 @@ public class InfiniteTerrain : MonoBehaviour
                 {
                     collisionLODMesh = lodMeshes[i];
                 }
+            }
+
+            meshTerrainGenerator.RequestMapData(position, OnMapDataReceived);
+        }
+
+        public void Reset()
+        {
+            this.noiseMap = null;
+            hasReceivedMapData = false;
+
+            for(int i = 0; i < lodMeshes.Length; i++)
+            {
+                lodMeshes[i].hasReceivedMesh = false;
+                lodMeshes[i].hasRequestedMesh = false;
             }
 
             meshTerrainGenerator.RequestMapData(position, OnMapDataReceived);
@@ -262,10 +326,6 @@ public class InfiniteTerrain : MonoBehaviour
         public bool hasReceivedMesh;
         int levelOfDetail;
         Action updateCallback;
-        GameObject waterPrefab;
-        AnimationCurve regionHeightCurve;
-        Transform parent;
-        GameObject water;
         public LODMesh(int levelOfDetail, Action callback)
         {
             mesh = new Mesh();

@@ -52,6 +52,10 @@ public class ProceduralMeshTerrain : MonoBehaviour
     ConcurrentQueue<MapThreadInfo<float[,]>> mapThreadInfos = new ConcurrentQueue<MapThreadInfo<float[,]>>();
     ConcurrentQueue<MapThreadInfo<MeshData>> meshThreadInfos = new ConcurrentQueue<MapThreadInfo<MeshData>>();
 
+    InfiniteTerrain infiniteTerrain;
+
+    PreviousValues previousValues;
+
     //public AllRequestParams allParams;
 
     private void Awake()
@@ -66,6 +70,11 @@ public class ProceduralMeshTerrain : MonoBehaviour
         meshRenderer = GetComponent<MeshRenderer>();
         meshFilter.mesh = mesh;
         water = null;
+
+        previousValues = new PreviousValues(depth, scale, startFrequency, startAmplitude, gain, 
+           lacunarity, octaveCount, xOffSet, yOffSet, seed);
+
+        infiniteTerrain = GetComponent<InfiniteTerrain>();
     }
 
     // Update is called once per frame
@@ -73,6 +82,7 @@ public class ProceduralMeshTerrain : MonoBehaviour
     {
         if(useThreading)
         {
+            ProcessValueChange();
             if (mapThreadInfos.Count > 0)
             {
                 for (int i = 0; i < mapThreadInfos.Count; i++)
@@ -243,6 +253,54 @@ public class ProceduralMeshTerrain : MonoBehaviour
         {
             this.callback = callback;
             this.parameter = parameter;
+        }
+    }
+
+    void ProcessValueChange()
+    {
+        if (previousValues.depth != depth || previousValues.scale != scale || previousValues.startFrequency != startFrequency || 
+            previousValues.startAmplitude != startAmplitude || previousValues.gain != gain || 
+            previousValues.lacunarity != lacunarity || previousValues.octaveCount != octaveCount || 
+            previousValues.xOffSet != xOffSet || previousValues.yOffSet != yOffSet || previousValues.seed != seed)
+        {
+            if (useThreading && Input.GetKeyDown(KeyCode.Space))
+            {
+                previousValues = new PreviousValues(depth, scale, startFrequency, startAmplitude, gain, lacunarity, 
+                    octaveCount, xOffSet, yOffSet, seed); 
+
+
+                infiniteTerrain.OnValuesChanged();
+            }
+        }
+        
+    }
+
+    struct PreviousValues
+    {
+        public int depth;
+        public float scale;
+        public float startFrequency;
+        public float startAmplitude;
+        public float gain;
+        public float lacunarity;
+        public int octaveCount;
+        public float xOffSet;
+        public float yOffSet;
+        public int seed;
+
+        public PreviousValues(int depth, float scale, float startFrequency, float startAmplitude, float gain, 
+            float lacunarity, int octaveCount, float xOffSet, float yOffSet, int seed)
+        {
+            this.depth = depth;
+            this.scale = scale;
+            this.startFrequency = startFrequency;
+            this.startAmplitude = startAmplitude;
+            this.gain = gain;
+            this.lacunarity = lacunarity;
+            this.octaveCount = octaveCount;
+            this.xOffSet = xOffSet;
+            this.yOffSet = yOffSet;
+            this.seed = seed;
         }
     }
 
