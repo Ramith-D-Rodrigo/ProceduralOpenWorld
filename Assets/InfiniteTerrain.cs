@@ -13,10 +13,9 @@ public class InfiniteTerrain : MonoBehaviour
 
     public Transform player;
     public Transform freeView;
+    public HUDOptions hUDOptions;
 
     Transform currentViewTransform;
-
-    bool isInGodMode = false;
 
     public static Vector2 viewerPosition;
     Vector2 prevViewerPosition;
@@ -79,31 +78,35 @@ public class InfiniteTerrain : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.G))
         {
-            isInGodMode = !isInGodMode;
+            meshTerrainGenerator.IsInGodMode = !meshTerrainGenerator.IsInGodMode;
             SwitchView();
         }
     }
 
     void SwitchView()
     {
-        if (isInGodMode)
+        if (meshTerrainGenerator.IsInGodMode)
         {
+            hUDOptions.gameObject.SetActive(true);
             currentViewTransform = freeView;
             player.parent.gameObject.SetActive(false);
             freeView.gameObject.SetActive(true);
+            ToggleCollisionsOnChunks(false);
         }
         else
         {
+            hUDOptions.gameObject.SetActive(false);
             currentViewTransform = player;
             player.parent.gameObject.SetActive(true);
             freeView.gameObject.SetActive(false);
+            ToggleCollisionsOnChunks(true);
 
         }
     }
 
     public void OnValuesChanged()
     {
-        if (!isInGodMode)
+        if (!meshTerrainGenerator.IsInGodMode)
         {
             return;
         }
@@ -112,7 +115,15 @@ public class InfiniteTerrain : MonoBehaviour
         {
             chunk.Reset();
         }
-        UpdateVisibleChunks();
+        lastVisibleTerrainChunks.Clear();
+    }
+
+    public void ToggleCollisionsOnChunks(bool enabled)
+    {
+        foreach (TerrainChunk chunk in terrainChunkDictionary.Values)
+        {
+            chunk.ToggleMeshCollision(enabled);
+        }
     }
 
     void UpdateVisibleChunks()
@@ -141,7 +152,7 @@ public class InfiniteTerrain : MonoBehaviour
                     terrainChunkDictionary.Add(
                         viewedChunkCoord, 
                         new TerrainChunk(viewedChunkCoord, chunkSize, detailLevels, transform, testMaterial, scale, 
-                        meshTerrainGenerator.regionHeightCurve, waterPrefab)
+                        meshTerrainGenerator.regionHeightCurve, waterPrefab, meshTerrainGenerator.IsInGodMode)
                         );
                 }
             }
@@ -170,7 +181,7 @@ public class InfiniteTerrain : MonoBehaviour
         int previousLODIndex = -1;
 
         public TerrainChunk(Vector2 coord, int size, LODInfo[] LODDetails, Transform parent, Material material, float scale, 
-            AnimationCurve regionHeightCurve, GameObject waterPrefab)
+            AnimationCurve regionHeightCurve, GameObject waterPrefab, bool isInGodMode)
         {
             detailLevels = LODDetails;
             position = coord * size;
@@ -179,7 +190,7 @@ public class InfiniteTerrain : MonoBehaviour
             meshObject = new GameObject("Terrain Chunk");
             meshRenderer = meshObject.AddComponent<MeshRenderer>();
             meshFilter = meshObject.AddComponent<MeshFilter>();
-            meshCollider = meshObject.AddComponent<MeshCollider>();
+            meshCollider = !isInGodMode ? meshObject.AddComponent<MeshCollider>() : null;
             meshRenderer.material = material;
 
             meshObject.transform.position = positionV3 * scale;
@@ -216,6 +227,11 @@ public class InfiniteTerrain : MonoBehaviour
             }
 
             meshTerrainGenerator.RequestMapData(position, OnMapDataReceived);
+        }
+
+        public void ToggleMeshCollision(bool enabled)
+        {
+            meshCollider.enabled = enabled;
         }
 
         void OnMapDataReceived(float[,] noiseMap)
@@ -287,7 +303,7 @@ public class InfiniteTerrain : MonoBehaviour
 
                 if (lodIndex == 0)  //only add the collider for the lowest level of detail (highest resolution)
                 {
-                    if (collisionLODMesh.hasReceivedMesh)
+                    if (meshCollider && collisionLODMesh.hasReceivedMesh)
                     {
                         meshCollider.sharedMesh = collisionLODMesh.mesh;
                     }
@@ -299,7 +315,10 @@ public class InfiniteTerrain : MonoBehaviour
                 else
                 {
                     //remove the collider if the level of detail is not the highest resolution
-                    meshCollider.sharedMesh = null;
+                    if (meshCollider)
+                    {
+                        meshCollider.enabled = false;
+                    }
                 }
 
                 lastVisibleTerrainChunks.Add(this);

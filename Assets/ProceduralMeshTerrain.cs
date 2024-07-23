@@ -54,13 +54,27 @@ public class ProceduralMeshTerrain : MonoBehaviour
 
     InfiniteTerrain infiniteTerrain;
 
-    PreviousValues previousValues;
+    MapGeneratingValues previousValues;
+
+    bool isInGodMode;
+    public bool IsInGodMode
+    {
+        get
+        {
+            return isInGodMode;
+        }
+        set
+        {
+            isInGodMode = value;
+        }
+    }
 
     //public AllRequestParams allParams;
 
     private void Awake()
     {
         falloffMap = FallOffGenerator.GenerateFalloffMap(mapChunkSize + 2);
+        isInGodMode = false;
     }
 
     void Start()
@@ -71,7 +85,7 @@ public class ProceduralMeshTerrain : MonoBehaviour
         meshFilter.mesh = mesh;
         water = null;
 
-        previousValues = new PreviousValues(depth, scale, startFrequency, startAmplitude, gain, 
+        previousValues = new MapGeneratingValues(depth, scale, startFrequency, startAmplitude, gain, 
            lacunarity, octaveCount, xOffSet, yOffSet, seed);
 
         infiniteTerrain = GetComponent<InfiniteTerrain>();
@@ -82,7 +96,6 @@ public class ProceduralMeshTerrain : MonoBehaviour
     {
         if(useThreading)
         {
-            ProcessValueChange();
             if (mapThreadInfos.Count > 0)
             {
                 for (int i = 0; i < mapThreadInfos.Count; i++)
@@ -256,96 +269,50 @@ public class ProceduralMeshTerrain : MonoBehaviour
         }
     }
 
-    void ProcessValueChange()
+    public void ProcessValueChange()
     {
         if (previousValues.depth != depth || previousValues.scale != scale || previousValues.startFrequency != startFrequency || 
             previousValues.startAmplitude != startAmplitude || previousValues.gain != gain || 
             previousValues.lacunarity != lacunarity || previousValues.octaveCount != octaveCount || 
             previousValues.xOffSet != xOffSet || previousValues.yOffSet != yOffSet || previousValues.seed != seed)
         {
-            if (useThreading && Input.GetKeyDown(KeyCode.Space))
+            if (useThreading)
             {
-                previousValues = new PreviousValues(depth, scale, startFrequency, startAmplitude, gain, lacunarity, 
+                previousValues = new MapGeneratingValues(depth, scale, startFrequency, startAmplitude, gain, lacunarity, 
                     octaveCount, xOffSet, yOffSet, seed); 
 
 
                 infiniteTerrain.OnValuesChanged();
             }
         }
-        
     }
-
-    struct PreviousValues
-    {
-        public int depth;
-        public float scale;
-        public float startFrequency;
-        public float startAmplitude;
-        public float gain;
-        public float lacunarity;
-        public int octaveCount;
-        public float xOffSet;
-        public float yOffSet;
-        public int seed;
-
-        public PreviousValues(int depth, float scale, float startFrequency, float startAmplitude, float gain, 
-            float lacunarity, int octaveCount, float xOffSet, float yOffSet, int seed)
-        {
-            this.depth = depth;
-            this.scale = scale;
-            this.startFrequency = startFrequency;
-            this.startAmplitude = startAmplitude;
-            this.gain = gain;
-            this.lacunarity = lacunarity;
-            this.octaveCount = octaveCount;
-            this.xOffSet = xOffSet;
-            this.yOffSet = yOffSet;
-            this.seed = seed;
-        }
-    }
-
-
- /*   private AllRequestParams CreateAllRequestParams()
-    {
-        MapRequestParams mapRequestParams = new MapRequestParams
-        {
-            chunkSize = mapChunkSize,
-            seed = seed,
-            offset = new Vector2(xOffSet, yOffSet),
-            scale = scale,
-            octaveCount = octaveCount,
-            gain = gain,
-            startAmplitude = startAmplitude,
-            startFrequency = startFrequency,
-            lacunarity = lacunarity
-        };
-
-        MeshRequestParams meshRequestParams = new MeshRequestParams
-        {
-            levelOfDetail = levelOfDetail,
-            regions = regions,
-            regionHeightCurve = regionHeightCurve,
-            depth = depth
-        };
-
-        AllRequestParams allRequestParams = new AllRequestParams
-        {
-            mapRequestParams = mapRequestParams,
-            meshRequestParams = meshRequestParams
-        };
-
-        return allRequestParams;
-    }*/
 }
 
-/*public struct AllRequestParams
+public struct MapGeneratingValues
 {
-    public MapRequestParams mapRequestParams;
-    public MeshRequestParams meshRequestParams;
+    public int depth;
+    public float scale;
+    public float startFrequency;
+    public float startAmplitude;
+    public float gain;
+    public float lacunarity;
+    public int octaveCount;
+    public float xOffSet;
+    public float yOffSet;
+    public int seed;
 
-    public AllRequestParams(MapRequestParams mapRequestParams, MeshRequestParams meshRequestParams)
+    public MapGeneratingValues(int depth, float scale, float startFrequency, float startAmplitude, float gain,
+        float lacunarity, int octaveCount, float xOffSet, float yOffSet, int seed)
     {
-        this.mapRequestParams = mapRequestParams;
-        this.meshRequestParams = meshRequestParams;
+        this.depth = depth;
+        this.scale = scale;
+        this.startFrequency = startFrequency;
+        this.startAmplitude = startAmplitude;
+        this.gain = gain;
+        this.lacunarity = lacunarity;
+        this.octaveCount = octaveCount;
+        this.xOffSet = xOffSet;
+        this.yOffSet = yOffSet;
+        this.seed = seed;
     }
-}*/
+}
