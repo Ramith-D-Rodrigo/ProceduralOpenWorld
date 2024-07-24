@@ -344,6 +344,13 @@ public class InfiniteTerrain : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        //clear out the static variables
+        viewerPosition = Vector2.zero;
+        lastVisibleTerrainChunks.Clear();
+    }
+
     class LODMesh
     {
         public Mesh mesh;

@@ -85,11 +85,12 @@ public class ProceduralMeshTerrain : MonoBehaviour
     private void Awake()
     {
         falloffMap = FallOffGenerator.GenerateFalloffMap(mapChunkSize + 2);
-        isInGodMode = false;
     }
 
     void Start()
     {
+        isInGodMode = !useThreading;
+
         mesh = new Mesh();
         meshFilter = GetComponent<MeshFilter>();
         meshRenderer = GetComponent<MeshRenderer>();
