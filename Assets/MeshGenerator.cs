@@ -77,6 +77,7 @@ public static class MeshGenerator
             }
         }
 
+        meshData.SetNoiseMap(noiseMap);
         meshData.BakeNormals();
 
         return meshData;
@@ -99,6 +100,8 @@ public struct MeshData
     public Vector2[] uvs;
     public Vector3[] bakedNormals;
 
+    public float[,] originalNoiseMap;
+
     Vector3[] borderVertices;
     int[] borderTriangles;
 
@@ -118,6 +121,12 @@ public struct MeshData
         borderTriangleIndex = 0;
 
         bakedNormals = null;
+        originalNoiseMap = null;
+    }
+
+    public void SetNoiseMap(float[,] noiseMap)
+    {
+        originalNoiseMap = noiseMap;
     }
 
     public void AddVertex(Vector3 vertexPosition, Vector2 uv, int vertexIndex)

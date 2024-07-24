@@ -80,7 +80,9 @@ public class HUDOptions : MonoBehaviour
             proceduralMeshTerrain.octaveCount, 
             proceduralMeshTerrain.xOffSet, 
             proceduralMeshTerrain.yOffSet, 
-            proceduralMeshTerrain.seed
+            proceduralMeshTerrain.seed,
+            proceduralMeshTerrain.treeDensity,
+            proceduralMeshTerrain.treeScale
             );
 
         ResetSliderValues();

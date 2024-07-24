@@ -175,6 +175,9 @@ public class InfiniteTerrain : MonoBehaviour
 
         GameObject water;
 
+        Dictionary<Vector2, GameObject> trees;
+        public Dictionary<Vector2, GameObject> Trees { get { return trees; } }
+
         float[,] noiseMap;
         bool hasReceivedMapData;
 
@@ -190,7 +193,7 @@ public class InfiniteTerrain : MonoBehaviour
             meshObject = new GameObject("Terrain Chunk");
             meshRenderer = meshObject.AddComponent<MeshRenderer>();
             meshFilter = meshObject.AddComponent<MeshFilter>();
-            meshCollider = !isInGodMode ? meshObject.AddComponent<MeshCollider>() : null;
+            meshCollider = meshObject.AddComponent<MeshCollider>();
             meshRenderer.material = material;
 
             meshObject.transform.position = positionV3 * scale;
@@ -202,10 +205,12 @@ public class InfiniteTerrain : MonoBehaviour
             water = ProceduralMeshTerrain.CreateWater(boundSizes, waterPrefab, regionHeightCurve, meshObject.transform);
             SetVisible(false);
 
+            trees = new Dictionary<Vector2, GameObject>();
+
             lodMeshes = new LODMesh[detailLevels.Length];
             for(int i = 0; i < detailLevels.Length; i++)
             {
-                lodMeshes[i] = new LODMesh(detailLevels[i].levelOfDetail, UpdateTerrainChunk);
+                lodMeshes[i] = new LODMesh(detailLevels[i].levelOfDetail, meshObject.transform, trees, UpdateTerrainChunk);
                 if(detailLevels[i].useForCollider)
                 {
                     collisionLODMesh = lodMeshes[i];
@@ -306,6 +311,7 @@ public class InfiniteTerrain : MonoBehaviour
                     if (meshCollider && collisionLODMesh.hasReceivedMesh)
                     {
                         meshCollider.sharedMesh = collisionLODMesh.mesh;
+                        meshCollider.enabled = true;
                     }
                     else if (!collisionLODMesh.hasRequestedMesh)
                     {
@@ -345,17 +351,38 @@ public class InfiniteTerrain : MonoBehaviour
         public bool hasReceivedMesh;
         int levelOfDetail;
         Action updateCallback;
-        public LODMesh(int levelOfDetail, Action callback)
+        Transform parent;
+        Dictionary<Vector2, GameObject> trees;
+        public LODMesh(int levelOfDetail, Transform parentChunk, Dictionary<Vector2, GameObject> trees, Action callback)
         {
             mesh = new Mesh();
             this.levelOfDetail = levelOfDetail;
             updateCallback = callback;
+            parent = parentChunk;
+            this.trees = trees;
         }
 
         void OnMeshDataReceived(MeshData meshData)
         {
             MeshGenerator.CreateMesh(mesh, meshData);
             hasReceivedMesh = true;
+            if (levelOfDetail == 0)
+            {
+                meshTerrainGenerator.RequestTreeData(meshData, parent, trees, OnTreeDataReceived);
+            }
+            else
+            {
+                updateCallback();
+            }
+        }
+
+        void OnTreeDataReceived(Dictionary<Vector2, Vector3> treePositions, GameObject treePrefab, float[,] noiseMap)
+        {
+            if(levelOfDetail == 0)
+            {
+                meshTerrainGenerator.ClearTrees(trees, noiseMap);
+                ProceduralMeshTerrain.InstantiateTrees(treePositions, trees, treePrefab, parent);
+            }
             updateCallback();
         }
 

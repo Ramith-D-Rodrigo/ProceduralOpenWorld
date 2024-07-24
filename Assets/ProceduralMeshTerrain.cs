@@ -45,12 +45,23 @@ public class ProceduralMeshTerrain : MonoBehaviour
     public GameObject waterPrefab;
     private GameObject water;
 
+    //tree prefab
+    public GameObject lowPolyTreePrefab;
+    public float treeDensity = 0.5f;
+    public float treeScale = 1.0f;
+    float lowTreeHeightBoundary;
+    float highTreeHeightBoundary;
+
+    Dictionary<Vector2, GameObject> instantiatedTrees = new();
+
     float[,] noiseMap;
     float[,] falloffMap;
+    MeshData meshData;
     Texture2D noiseMapTexture;
 
     ConcurrentQueue<MapThreadInfo<float[,]>> mapThreadInfos = new ConcurrentQueue<MapThreadInfo<float[,]>>();
     ConcurrentQueue<MapThreadInfo<MeshData>> meshThreadInfos = new ConcurrentQueue<MapThreadInfo<MeshData>>();
+    ConcurrentQueue<TreeThreadInfo> treeThreadInfos = new ConcurrentQueue<TreeThreadInfo>();
 
     InfiniteTerrain infiniteTerrain;
 
@@ -86,9 +97,16 @@ public class ProceduralMeshTerrain : MonoBehaviour
         water = null;
 
         previousValues = new MapGeneratingValues(depth, scale, startFrequency, startAmplitude, gain, 
-           lacunarity, octaveCount, xOffSet, yOffSet, seed);
+           lacunarity, octaveCount, xOffSet, yOffSet, seed, treeDensity, treeScale);
 
         infiniteTerrain = GetComponent<InfiniteTerrain>();
+
+        SetTreeHeighBoundaries();
+
+        if(!useThreading)
+        {
+            GenerateCompleteMap();
+        }
     }
 
     // Update is called once per frame
@@ -121,10 +139,23 @@ public class ProceduralMeshTerrain : MonoBehaviour
                     }
                 }
             }
+
+            if(treeThreadInfos.Count > 0)
+            {
+                for (int i = 0; i < treeThreadInfos.Count; i++)
+                {
+                    TreeThreadInfo threadInfo;
+                    bool isDequeued = treeThreadInfos.TryDequeue(out threadInfo);
+                    if (isDequeued)
+                    {
+                        threadInfo.callback(threadInfo.treePositions, threadInfo.treePrefab, threadInfo.noiseMap);
+                    }
+                }
+            }
         }
         else
         {
-            GenerateCompleteMap();
+            ProcessValueChange();
         }
 
     }
@@ -132,11 +163,13 @@ public class ProceduralMeshTerrain : MonoBehaviour
     private void GenerateCompleteMap()
     {
         noiseMap = GenerateMapData(Vector2.zero, normalizeMode);
-        MeshData meshData = MeshGenerator.GenerateMeshData(noiseMap, previewLOD, regions, regionHeightCurve, depth);
+        meshData = MeshGenerator.GenerateMeshData(noiseMap, previewLOD, regions, regionHeightCurve, depth);
         MeshGenerator.CreateMesh(mesh, meshData);
         CreateNoiseMapTexture();
         SetShaderGraphVariables();
         CreateOrEditWater();
+        ClearTrees(instantiatedTrees, noiseMap);
+        AddTrees();
     }
 
     private void OnValidate()
@@ -215,6 +248,84 @@ public class ProceduralMeshTerrain : MonoBehaviour
         }
     }
 
+    private void SetTreeHeighBoundaries()
+    {
+
+        lowTreeHeightBoundary = regions[4].height;
+        highTreeHeightBoundary = regions[5].height;
+    }
+
+    public void ClearTrees(Dictionary<Vector2, GameObject> trees, float[,] noiseMap)
+    {
+
+        List<Vector2> removingKeys = new List<Vector2>();
+
+        //go through each tree and check if it's position is still valid on the new map
+        foreach (KeyValuePair<Vector2, GameObject> tree in trees)
+        {
+            Vector2 noiseMapPosition = tree.Key;
+            float currentNoise = noiseMap[(int)noiseMapPosition.x, (int)noiseMapPosition.y];
+            if (currentNoise < lowTreeHeightBoundary || currentNoise > lowTreeHeightBoundary)
+            {
+                Destroy(tree.Value);
+                removingKeys.Add(noiseMapPosition);
+            }
+        }
+
+        removingKeys.ForEach(key => trees.Remove(key));
+    }
+
+    private void AddTrees()
+    {
+        Dictionary<Vector2, Vector3> treePositions =  GenerateTreePositions(treeScale, treeDensity, mapChunkSize, seed, 
+            meshData, noiseMap, lowTreeHeightBoundary, highTreeHeightBoundary);
+        InstantiateTrees(treePositions, instantiatedTrees, lowPolyTreePrefab, transform);
+    }
+
+    public static Dictionary<Vector2, Vector3> GenerateTreePositions(float treeScale, float treeDensity, int mapChunkSize, int seed, 
+        MeshData meshData, float[,] noiseMap, float lowTreeHeightBoundary, float highTreeHeightBoundary)
+    {
+        List<Octave> octaves = OctaveGenerator.GenerateOctaves(3, 0.5f);
+        Vector2 offsets = Vector2.zero;
+        float[,] treeMap = Noise.CreateNoiseMap(mapChunkSize + 2, mapChunkSize + 2, seed, offsets, treeScale, octaves,
+            Noise.NormalizeMode.Local, 1, new float[0,0], false);
+
+        Dictionary<Vector2, Vector3> treePositions = new();
+
+        for (int z = 0; z < mapChunkSize; z++)
+        {
+            for (int x = 0; x < mapChunkSize; x++)
+            {
+                //use mesh's vertices to position the tree
+                Vector3 treePlacementVertex = meshData.vertices[z * mapChunkSize + x];
+                float comparingHeight = noiseMap[x, z];
+
+                if (comparingHeight > lowTreeHeightBoundary && comparingHeight < highTreeHeightBoundary)
+                {
+                    if (treeMap[x, z] < treeDensity)
+                    {
+                        treePositions.Add(new Vector2(x, z), treePlacementVertex);
+                    }
+                }
+            }
+        }
+
+        return treePositions;
+    }
+
+    public static void InstantiateTrees(Dictionary<Vector2, Vector3> treePositions, Dictionary<Vector2, GameObject> instantiatedTrees, 
+        GameObject treePrefab, Transform parent)
+    {
+        foreach (KeyValuePair<Vector2, Vector3> treePos in treePositions)
+        {
+            GameObject tree = Instantiate(treePrefab, parent);
+            tree.transform.localPosition = treePos.Value;
+            tree.transform.rotation = Quaternion.Euler(0, UnityEngine.Random.Range(0, 360), 0);
+            tree.transform.localScale = Vector3.one * UnityEngine.Random.Range(0.8f, 1.2f);
+            instantiatedTrees.Add(treePos.Key, tree);
+        }
+    }
+
 
     public void RequestMapData(Vector2 center, Action<float[,]> callBack)
     {
@@ -258,6 +369,28 @@ public class ProceduralMeshTerrain : MonoBehaviour
         }
     }
 
+    public void RequestTreeData(MeshData meshData, Transform parent, Dictionary<Vector2, GameObject> trees, 
+        Action<Dictionary<Vector2, Vector3>, GameObject, float[,]> callBack)
+
+    {
+        ThreadStart threadStart = delegate
+        {
+            TreeDataThread(meshData, parent, trees, callBack);
+        };
+
+        new Thread(threadStart).Start();
+    }
+
+    public void TreeDataThread(MeshData meshData, Transform parent, Dictionary<Vector2, GameObject> trees,
+        Action<Dictionary<Vector2, Vector3>, GameObject, float[,]> callBack)
+    {
+        Dictionary<Vector2, Vector3> treePositions = GenerateTreePositions(treeScale, treeDensity, mapChunkSize, seed,
+                meshData, meshData.originalNoiseMap, lowTreeHeightBoundary, highTreeHeightBoundary);
+        lock (treeThreadInfos) {
+            treeThreadInfos.Enqueue(new TreeThreadInfo(callBack, treePositions, lowPolyTreePrefab, meshData.originalNoiseMap));
+        }
+    }
+
     struct MapThreadInfo<T> {
         public readonly Action<T> callback;
         public readonly T parameter;
@@ -269,6 +402,23 @@ public class ProceduralMeshTerrain : MonoBehaviour
         }
     }
 
+    struct TreeThreadInfo
+    {
+        public readonly Action<Dictionary<Vector2, Vector3>, GameObject, float[,]> callback;
+        public readonly Dictionary<Vector2, Vector3> treePositions;
+        public readonly GameObject treePrefab;
+        public readonly float[,] noiseMap;
+
+        public TreeThreadInfo(Action<Dictionary<Vector2, Vector3>, GameObject, float[,]> callback, 
+            Dictionary<Vector2, Vector3> treePositions, GameObject treePrefab, float[,] noiseMap)
+        {
+            this.callback = callback;
+            this.treePositions = treePositions;
+            this.treePrefab = treePrefab;
+            this.noiseMap = noiseMap;
+        }
+    }
+
     public void ProcessValueChange()
     {
         if (previousValues.depth != depth || previousValues.scale != scale || previousValues.startFrequency != startFrequency || 
@@ -276,15 +426,24 @@ public class ProceduralMeshTerrain : MonoBehaviour
             previousValues.lacunarity != lacunarity || previousValues.octaveCount != octaveCount || 
             previousValues.xOffSet != xOffSet || previousValues.yOffSet != yOffSet || previousValues.seed != seed)
         {
+            previousValues = new MapGeneratingValues(depth, scale, startFrequency, startAmplitude, gain, lacunarity,
+                    octaveCount, xOffSet, yOffSet, seed, treeDensity, treeScale);
             if (useThreading)
             {
-                previousValues = new MapGeneratingValues(depth, scale, startFrequency, startAmplitude, gain, lacunarity, 
-                    octaveCount, xOffSet, yOffSet, seed); 
-
-
                 infiniteTerrain.OnValuesChanged();
             }
+            else
+            {
+                GenerateCompleteMap();
+            }
         }
+        else if (previousValues.treeDensity != treeDensity || previousValues.treeScale != treeScale)
+        {
+            previousValues = new MapGeneratingValues(depth, scale, startFrequency, startAmplitude, gain, lacunarity,
+                    octaveCount, xOffSet, yOffSet, seed, treeDensity, treeScale);
+            ClearTrees(instantiatedTrees, noiseMap);
+            AddTrees();
+        } 
     }
 }
 
@@ -300,9 +459,11 @@ public struct MapGeneratingValues
     public float xOffSet;
     public float yOffSet;
     public int seed;
+    public float treeDensity;
+    public float treeScale;
 
     public MapGeneratingValues(int depth, float scale, float startFrequency, float startAmplitude, float gain,
-        float lacunarity, int octaveCount, float xOffSet, float yOffSet, int seed)
+        float lacunarity, int octaveCount, float xOffSet, float yOffSet, int seed, float treeDensity, float treeScale)
     {
         this.depth = depth;
         this.scale = scale;
@@ -314,5 +475,7 @@ public struct MapGeneratingValues
         this.xOffSet = xOffSet;
         this.yOffSet = yOffSet;
         this.seed = seed;
+        this.treeDensity = treeDensity;
+        this.treeScale = treeScale;
     }
 }
