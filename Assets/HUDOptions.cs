@@ -88,27 +88,27 @@ public class HUDOptions : MonoBehaviour
 
     public void ResetSliderValues()
     {
-        scaleSlider.value = proceduralMeshTerrain.scale;
-        depthSlider.value = proceduralMeshTerrain.depth;
-        octaveCountSlider.value = proceduralMeshTerrain.octaveCount;
-        gainSlider.value = proceduralMeshTerrain.gain;
-        lacunaritySlider.value = proceduralMeshTerrain.lacunarity;
-        seedSlider.value = proceduralMeshTerrain.seed;
-        xOffsetSlider.value = proceduralMeshTerrain.xOffSet;
-        yOffsetSlider.value = proceduralMeshTerrain.yOffSet;
-        amplitudeSlider.value = proceduralMeshTerrain.startAmplitude;
-        frequencySlider.value = proceduralMeshTerrain.startFrequency;
+        scaleSlider.value = originalValues.scale;
+        depthSlider.value = originalValues.depth;
+        octaveCountSlider.value = originalValues.octaveCount;
+        gainSlider.value = originalValues.gain;
+        lacunaritySlider.value = originalValues.lacunarity;
+        seedSlider.value = originalValues.seed;
+        xOffsetSlider.value = originalValues.xOffSet;
+        yOffsetSlider.value = originalValues.yOffSet;
+        amplitudeSlider.value = originalValues.startAmplitude;
+        frequencySlider.value = originalValues.startFrequency;
 
-        scaleText.text = proceduralMeshTerrain.scale.ToString();
-        depthText.text = proceduralMeshTerrain.depth.ToString();
-        octaveCountText.text = proceduralMeshTerrain.octaveCount.ToString();
-        gainText.text = proceduralMeshTerrain.gain.ToString();
-        lacunarityText.text = proceduralMeshTerrain.lacunarity.ToString();
-        seedText.text = proceduralMeshTerrain.seed.ToString();
-        xOffsetText.text = proceduralMeshTerrain.xOffSet.ToString();
-        yOffsetText.text = proceduralMeshTerrain.yOffSet.ToString();
-        amplitudeText.text = proceduralMeshTerrain.startAmplitude.ToString();
-        frequencyText.text = proceduralMeshTerrain.startFrequency.ToString();
+        scaleText.text = originalValues.scale.ToString();
+        depthText.text = originalValues.depth.ToString();
+        octaveCountText.text = originalValues.octaveCount.ToString();
+        gainText.text = originalValues.gain.ToString();
+        lacunarityText.text = originalValues.lacunarity.ToString();
+        seedText.text = originalValues.seed.ToString();
+        xOffsetText.text = originalValues.xOffSet.ToString();
+        yOffsetText.text = originalValues.yOffSet.ToString();
+        amplitudeText.text = originalValues.startAmplitude.ToString();
+        frequencyText.text = originalValues.startFrequency.ToString();
     }
 
     public void ApplyChanges()
@@ -125,6 +125,12 @@ public class HUDOptions : MonoBehaviour
         proceduralMeshTerrain.yOffSet = yOffsetSlider.value;
 
         proceduralMeshTerrain.ProcessValueChange();
+    }
+
+    public void ResetChanges()
+    {
+        ResetSliderValues();
+        ApplyChanges();
     }
 
 
