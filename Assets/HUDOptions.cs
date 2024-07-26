@@ -82,9 +82,49 @@ public class HUDOptions : MonoBehaviour
 
     int sceneIndex;
 
+    private void Awake()
+    {
+        proceduralMeshTerrain = FindObjectOfType<ProceduralMeshTerrain>();
+        if (!proceduralMeshTerrain.useThreading)
+        {
+            //dont lock the cursor
+            Cursor.lockState = CursorLockMode.None;
+
+            //deactivate the buttons
+            applyButton.gameObject.SetActive(false);
+
+            //display the tree density and tree scale sliders
+            treeDensitySlider.transform.parent.gameObject.SetActive(true);
+            treeScaleSlider.transform.parent.gameObject.SetActive(true);
+        }
+        else
+        {
+            //lock the cursor
+            Cursor.lockState = CursorLockMode.Locked;
+
+            //deactivate the buttons
+            applyButton.gameObject.SetActive(true);
+
+            //display the tree density and tree scale sliders
+            treeDensitySlider.transform.parent.gameObject.SetActive(false);
+            treeScaleSlider.transform.parent.gameObject.SetActive(false);
+
+            this.gameObject.SetActive(false);
+        }
+    }
+
     void Start()
     {
-        proceduralMeshTerrain = FindObjectOfType<ProceduralMeshTerrain>();      
+        sceneIndex = UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex;
+        if (sceneIndex == 0)
+        {
+            switchSceneButtonText.text = "Switch to Endless Terrain";
+        }
+        else
+        {
+            switchSceneButtonText.text = "Switch to Single Terrain";
+        }
+    
 
         originalValues = new MapGeneratingValues(proceduralMeshTerrain.depth, 
             proceduralMeshTerrain.scale,
@@ -101,46 +141,6 @@ public class HUDOptions : MonoBehaviour
             );
 
         ResetSliderValues();
-
-        if(!proceduralMeshTerrain.useThreading)
-        {
-            //dont lock the cursor
-            Cursor.lockState = CursorLockMode.None;
-
-            //deactivate the buttons
-            applyButton.gameObject.SetActive(false);
-            resetButton.gameObject.SetActive(false);
-
-            //display the tree density and tree scale sliders
-            treeDensitySlider.transform.parent.gameObject.SetActive(true);
-            treeScaleSlider.transform.parent.gameObject.SetActive(true);
-        }
-        else
-        {
-            //lock the cursor
-            Cursor.lockState = CursorLockMode.Locked;
-
-            //deactivate the buttons
-            applyButton.gameObject.SetActive(true);
-            resetButton.gameObject.SetActive(true);
-
-            //display the tree density and tree scale sliders
-            treeDensitySlider.transform.parent.gameObject.SetActive(false);
-            treeScaleSlider.transform.parent.gameObject.SetActive(false);
-
-            this.gameObject.SetActive(false);
-        }
-
-        sceneIndex = UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex;
-        if(sceneIndex == 0)
-        {
-            switchSceneButtonText.text = "Switch to Single Terrain";
-        }
-        else
-        {
-            switchSceneButtonText.text = "Switch to Endless Terrain";
-        }
-
     }
 
     public void ResetSliderValues()

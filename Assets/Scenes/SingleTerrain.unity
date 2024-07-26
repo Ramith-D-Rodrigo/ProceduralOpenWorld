@@ -207,8 +207,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 513646082}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.20719402, y: 0.794915, z: -0.42100087, w: 0.38462847}
-  m_LocalPosition: {x: -186.84265, y: 213.68056, z: 75.94928}
+  m_LocalRotation: {x: -0.15382698, y: -0.8422168, z: 0.40715677, w: -0.31816915}
+  m_LocalPosition: {x: -147.25189, y: 217.78531, z: 140.99924}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -583,6 +583,7 @@ GameObject:
   - component: {fileID: 1170547193}
   - component: {fileID: 1170547192}
   - component: {fileID: 1170547191}
+  - component: {fileID: 1170547196}
   m_Layer: 0
   m_Name: World
   m_TagString: Untagged
@@ -738,6 +739,7 @@ MonoBehaviour:
   lowPolyTreePrefab: {fileID: 1913398837464306055, guid: f11941cc0a9abce49b84ce15ca746fa0, type: 3}
   treeDensity: 0.1
   treeScale: 1
+  cloudPrefab: {fileID: 3414594373478531100, guid: bb8f1ba30fc9d9d4eb64d12f9bc9d4f6, type: 3}
 --- !u!23 &1170547193
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -803,6 +805,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1170547196
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1170547190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a6c0a76568b3c849a92f49e50375e4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
