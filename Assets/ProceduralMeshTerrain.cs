@@ -52,6 +52,12 @@ public class ProceduralMeshTerrain : MonoBehaviour
     float lowTreeHeightBoundary;
     float highTreeHeightBoundary;
 
+    //cloud prefab
+    public GameObject cloudPrefab;
+    private GameObject cloud;
+    float cloudHeight = 0.8f;
+
+
     Dictionary<Vector2, GameObject> instantiatedTrees = new();
 
     float[,] noiseMap;
@@ -167,6 +173,7 @@ public class ProceduralMeshTerrain : MonoBehaviour
         meshData = MeshGenerator.GenerateMeshData(noiseMap, previewLOD, regions, regionHeightCurve, depth);
         MeshGenerator.CreateMesh(mesh, meshData);
         CreateNoiseMapTexture();
+        AddClouds();
         SetShaderGraphVariables();
         CreateOrEditWater();
         ClearTrees(instantiatedTrees, noiseMap);
@@ -247,6 +254,21 @@ public class ProceduralMeshTerrain : MonoBehaviour
             waterPosition = GetWaterPosition(waterPosition, regionHeightCurve);
             water.transform.position = waterPosition;
         }
+    }
+
+    void AddClouds()
+    {
+        if(cloud == null)
+        {
+            cloud = Instantiate(cloudPrefab, transform);
+            cloud.transform.localScale = new Vector3(23.9f, 1, 23.9f);
+        }
+        float evaluatingHeight = Noise.FindMaxValueBetweenRange(noiseMap, regions[regions.Count - 2].height, 
+            regions[regions.Count - 1].height);
+        float evalutedHeight = regionHeightCurve.Evaluate(evaluatingHeight);
+        Vector3 cloudPosition = new Vector3(0, evalutedHeight * depth, 0);
+        cloud.transform.position = cloudPosition;
+
     }
 
     private void SetTreeHeighBoundaries()

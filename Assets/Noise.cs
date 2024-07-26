@@ -109,4 +109,24 @@ public class Noise
 
          return noiseMap;
     }
+
+    public static float FindMaxValueBetweenRange(float[,] noiseMap, float min, float max)
+    {
+        float maxValue = float.MinValue;
+        for(int y = 0; y < noiseMap.GetLength(1); y++)
+        {
+            for(int x = 0; x < noiseMap.GetLength(0); x++)
+            {
+                if(noiseMap[x, y] > min && noiseMap[x, y] < max)
+                {
+                    if(noiseMap[x, y] > maxValue)
+                    {
+                        maxValue = noiseMap[x, y];
+                    }
+                }
+            }
+        }
+
+        return maxValue;
+    }
 }
