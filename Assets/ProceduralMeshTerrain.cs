@@ -242,6 +242,11 @@ public class ProceduralMeshTerrain : MonoBehaviour
 
     void CreateOrEditWater()
     {
+        if(regions == null || regions.Count == 0)
+        {
+            return;
+        }
+
         if(water == null)
         {
             Vector2 boundSizes = new Vector2(mapChunkSize, mapChunkSize);
@@ -258,6 +263,11 @@ public class ProceduralMeshTerrain : MonoBehaviour
 
     void AddClouds()
     {
+        if(regions == null || regions.Count == 0)
+        {
+            return;
+        }
+
         if(cloud == null)
         {
             cloud = Instantiate(cloudPrefab, transform);
@@ -273,13 +283,21 @@ public class ProceduralMeshTerrain : MonoBehaviour
 
     private void SetTreeHeighBoundaries()
     {
-
+        if(regions == null || regions.Count == 0)
+        {
+            return;
+        }
         lowTreeHeightBoundary = regions[4].height;
         highTreeHeightBoundary = regions[5].height;
     }
 
     public void ClearTrees(Dictionary<Vector2, GameObject> trees, float[,] noiseMap)
     {
+        if(regions == null || regions.Count == 0)
+        {
+            return;
+        }
+
 
         List<Vector2> removingKeys = new List<Vector2>();
 
@@ -300,6 +318,11 @@ public class ProceduralMeshTerrain : MonoBehaviour
 
     private void AddTrees()
     {
+        if(regions == null || regions.Count == 0)
+        {
+            return;
+        }
+
         Dictionary<Vector2, Vector3> treePositions =  GenerateTreePositions(treeScale, treeDensity, mapChunkSize, seed, 
             meshData, noiseMap, lowTreeHeightBoundary, highTreeHeightBoundary);
         InstantiateTrees(treePositions, instantiatedTrees, lowPolyTreePrefab, transform);
