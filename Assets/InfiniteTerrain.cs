@@ -174,6 +174,7 @@ public class InfiniteTerrain : MonoBehaviour
         LODMesh collisionLODMesh;
 
         GameObject water;
+        GameObject cloud;
 
         Dictionary<Vector2, GameObject> trees;
         public Dictionary<Vector2, GameObject> Trees { get { return trees; } }
@@ -203,6 +204,7 @@ public class InfiniteTerrain : MonoBehaviour
             Vector2 boundSizes = new Vector2(size, size);
 
             water = ProceduralMeshTerrain.CreateWater(boundSizes, waterPrefab, regionHeightCurve, meshObject.transform);
+            //cloud = meshTerrainGenerator.CreateCloud(boundSizes, regionHeightCurve, meshObject.transform, noiseMap);
             SetVisible(false);
 
             trees = new Dictionary<Vector2, GameObject>();
@@ -389,6 +391,9 @@ public class InfiniteTerrain : MonoBehaviour
             {
                 meshTerrainGenerator.ClearTrees(trees, noiseMap);
                 ProceduralMeshTerrain.InstantiateTrees(treePositions, trees, treePrefab, parent);
+
+                float chunkSize = mesh.bounds.size.x;
+                meshTerrainGenerator.CreateCloud(new Vector2(chunkSize - 1, chunkSize - 1), parent, noiseMap);
             }
             updateCallback();
         }

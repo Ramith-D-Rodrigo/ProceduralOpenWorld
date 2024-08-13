@@ -86,22 +86,23 @@ Material:
     - _alphaClip: 0.48
     - _cloudAlpha: 12.9
     - _cloudHeight: 0.7
-    - _cloudPower: 2.29
+    - _cloudPower: 2
     - _cloudScale: 30.5
     - _cloudSpeed: 0.05
-    - _distortScale: 28.59
-    - _distortSpeed: 0.05
+    - _distortScale: 45
+    - _distortSpeed: 0.03
     - _forestAlpha: 0.5
     - _forestHeight: 0.4
     - _mudAlpha: 1
     - _mudHeight: 0.6
     - _snowAlpha: 2
-    - _vertexOffset: 3
+    - _vertexOffset: 4
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _cloudColor: {r: 9.755493, g: 12.53433, b: 12.479342, a: 0}
-    - _cloudSpeed: {r: 0.01, g: 0.05, b: 0, a: 0}
+    - _cloudPosition: {r: 0, g: 0, b: 0, a: 0}
+    - _cloudSpeed: {r: 0.01, g: 0.03, b: 0, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &3314245244566283546
 MonoBehaviour:

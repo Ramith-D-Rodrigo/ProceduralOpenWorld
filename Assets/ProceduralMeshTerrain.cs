@@ -219,18 +219,22 @@ public class ProceduralMeshTerrain : MonoBehaviour
     public static GameObject CreateWater(Vector2 boundSizes, GameObject waterPrefab, AnimationCurve regionHeightCurve, 
         Transform parent)
     {
-            Vector3 waterPosition = Vector3.zero;
-            waterPosition = GetWaterPosition(waterPosition, regionHeightCurve);
+        Vector3 waterPosition = Vector3.zero;
+        waterPosition = GetWaterPosition(waterPosition, regionHeightCurve);
 
-            //create the water
-            GameObject water = Instantiate(waterPrefab, parent, false);
-            water.transform.localPosition = waterPosition;
-            //scale it to the size of the map and divide by 10 to make it smaller
-            water.transform.localScale = new Vector3((boundSizes.x + 1) / 10.0f, 1, 
-                (boundSizes.y + 1) / 10.0f);
-            return water;
+        //create the water
+        GameObject water = Instantiate(waterPrefab, parent, false);
+        water.transform.localPosition = waterPosition;
+        water.transform.localScale = CalculateLocalScale(boundSizes, water);
+        return water;
     }
 
+    private static Vector3 CalculateLocalScale(Vector2 boundSizes, GameObject water)
+    {
+        //scale it to the size of the map and divide by 10 to make it smaller
+        return new Vector3((boundSizes.x + 1) / 10.0f, 1,
+            (boundSizes.y + 1) / 10.0f);
+    }
 
     private static Vector3 GetWaterPosition(Vector3 waterPosition, AnimationCurve regionHeightCurve)
     {
@@ -263,22 +267,64 @@ public class ProceduralMeshTerrain : MonoBehaviour
 
     void AddClouds()
     {
-        if(regions == null || regions.Count == 0)
+        if (regions == null || regions.Count == 0)
         {
             return;
         }
 
-        if(cloud == null)
+        if (cloud == null)
         {
             cloud = Instantiate(cloudPrefab, transform);
             cloud.transform.localScale = new Vector3(23.9f, 1, 23.9f);
         }
-        float evaluatingHeight = Noise.FindMaxValueBetweenRange(noiseMap, regions[regions.Count - 2].height, 
-            regions[regions.Count - 1].height);
-        float evalutedHeight = regionHeightCurve.Evaluate(evaluatingHeight);
-        Vector3 cloudPosition = new Vector3(0, evalutedHeight * depth, 0);
+        Vector3 cloudPosition = GetCloudPosition(noiseMap, regionHeightCurve, regions, depth);
         cloud.transform.position = cloudPosition;
 
+    }
+
+    private static Vector3 GetCloudPosition(float[,] noiseMap, AnimationCurve regionHeightCurve, List<TerrainType> regions, float depth)
+    {
+        float evaluatingHeight = regions[regions.Count - 1].height; //Noise.FindMaxValueBetweenRange(noiseMap, regions[regions.Count - 2].height, regions[regions.Count - 1].height);
+        float evalutedHeight = regionHeightCurve.Evaluate(evaluatingHeight);
+        Vector3 cloudPosition = new Vector3(0, evalutedHeight * depth, 0);
+        return cloudPosition;
+    }
+
+    public GameObject CreateCloud(Vector2 boundSizes, Transform parent, float[,] terrainMap)
+    {
+        GameObject cloud = Instantiate(cloudPrefab, parent);
+        cloud.transform.localScale = CalculateLocalScale(boundSizes, cloud);
+        Vector3 cloudPosition = GetCloudPosition(terrainMap, regionHeightCurve, regions, depth);
+        cloud.transform.localPosition = cloudPosition;
+
+        MeshRenderer cloudMeshRenderer = cloud.GetComponent<MeshRenderer>();
+        Vector3 cloudWorldPosition = cloud.transform.position;
+        Vector2 cloudOffset =new Vector2(
+            (cloudWorldPosition.x / (cloud.transform.localScale.x * 10)),
+            (cloudWorldPosition.z / (cloud.transform.localScale.z * 10))
+            );
+
+        if(cloudOffset.x < 0)
+        {
+            cloudOffset.x = Mathf.Floor(cloudOffset.x);
+        }
+        else
+        {
+            cloudOffset.x = Mathf.Ceil(cloudOffset.x);
+        }
+
+        if(cloudOffset.y < 0)
+        {
+            cloudOffset.y = Mathf.Floor(cloudOffset.y);
+        }
+        else
+        {
+            cloudOffset.y = Mathf.Ceil(cloudOffset.y);
+        }
+
+        Debug.Log(cloudOffset);
+        cloudMeshRenderer.material.SetVector("_cloudPosition", new Vector4(-cloudOffset.x, -cloudOffset.y, 0, 0));
+        return cloud;
     }
 
     private void SetTreeHeighBoundaries()
