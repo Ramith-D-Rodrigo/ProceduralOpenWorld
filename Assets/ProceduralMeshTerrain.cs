@@ -69,7 +69,6 @@ public class ProceduralMeshTerrain : MonoBehaviour
     ConcurrentQueue<MapThreadInfo<float[,]>> mapThreadInfos = new ConcurrentQueue<MapThreadInfo<float[,]>>();
     ConcurrentQueue<MapThreadInfo<MeshData>> meshThreadInfos = new ConcurrentQueue<MapThreadInfo<MeshData>>();
     ConcurrentQueue<TreeThreadInfo> treeThreadInfos = new ConcurrentQueue<TreeThreadInfo>();
-    ConcurrentQueue<NavMeshDataThreadInfo> navMeshDataThreadInfos = new ConcurrentQueue<NavMeshDataThreadInfo>();
 
     InfiniteTerrain infiniteTerrain;
 
@@ -161,19 +160,6 @@ public class ProceduralMeshTerrain : MonoBehaviour
                     if (isDequeued)
                     {
                         threadInfo.callback(threadInfo.treePositions, threadInfo.treePrefab, threadInfo.noiseMap);
-                    }
-                }
-            }
-
-            if(navMeshDataThreadInfos.Count > 0)
-            {
-                for (int i = 0; i < navMeshDataThreadInfos.Count; i++)
-                {
-                    NavMeshDataThreadInfo threadInfo;
-                    bool isDequeued = navMeshDataThreadInfos.TryDequeue(out threadInfo);
-                    if (isDequeued)
-                    {
-                        threadInfo.callback(threadInfo.navMeshData);
                     }
                 }
             }
@@ -500,29 +486,6 @@ public class ProceduralMeshTerrain : MonoBehaviour
         }
     }
 
-    public void RequestNavMeshData(Mesh mesh, Transform parent, NavMeshBuildSettings meshBuildSettings, 
-        List<NavMeshBuildSource> buildSources, Action<NavMeshData> callBack)
-    {
-        ThreadStart threadStart = delegate
-        {
-            NavMeshDataThread(mesh, parent, meshBuildSettings, buildSources, callBack); 
-        };
-
-        new Thread(threadStart).Start();
-    }
-
-    private void NavMeshDataThread(Mesh mesh, Transform parent, NavMeshBuildSettings meshBuildSettings, 
-        List<NavMeshBuildSource> buildSources, Action<NavMeshData> callBack)
-    {
-        NavMeshData navMeshData = NavMeshBuilder.BuildNavMeshData(meshBuildSettings, buildSources,
-            mesh.bounds, parent.position, parent.rotation);
-
-        lock (navMeshDataThreadInfos)
-        {
-            navMeshDataThreadInfos.Enqueue(new NavMeshDataThreadInfo(navMeshData, callBack));
-        }
-    }
-
     struct MapThreadInfo<T> {
         public readonly Action<T> callback;
         public readonly T parameter;
@@ -548,18 +511,6 @@ public class ProceduralMeshTerrain : MonoBehaviour
             this.treePositions = treePositions;
             this.treePrefab = treePrefab;
             this.noiseMap = noiseMap;
-        }
-    }
-
-    struct NavMeshDataThreadInfo
-    {
-        public readonly Action<NavMeshData> callback;
-        public readonly NavMeshData navMeshData;
-
-        public NavMeshDataThreadInfo(NavMeshData navMeshData, Action<NavMeshData> callback)
-        {
-            this.navMeshData = navMeshData;
-            this.callback = callback;
         }
     }
 
