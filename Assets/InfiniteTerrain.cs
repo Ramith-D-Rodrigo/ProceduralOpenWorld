@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using Unity.AI.Navigation;
+using UnityEngine.AI;
+using UnityEditor.Rendering;
 
 public class InfiniteTerrain : MonoBehaviour
 {
@@ -24,7 +27,7 @@ public class InfiniteTerrain : MonoBehaviour
 
     public GameObject waterPrefab;
 
-    int chunkSize;
+    public int chunkSize;
     int chunksVisibleInViewDistance;
 
     public Material testMaterial;
@@ -34,6 +37,8 @@ public class InfiniteTerrain : MonoBehaviour
     static List<TerrainChunk> lastVisibleTerrainChunks = new List<TerrainChunk>();
 
     static ProceduralMeshTerrain meshTerrainGenerator;
+
+    public bool isAllInitalized = false;
 
     void Start()
     {
@@ -72,6 +77,17 @@ public class InfiniteTerrain : MonoBehaviour
             prevViewerPosition = viewerPosition;
             UpdateVisibleChunks();
         }
+
+        bool tempIsAllInitalized = true;
+        foreach(TerrainChunk chunk in lastVisibleTerrainChunks)
+        {
+            if(!chunk.isInitialized)
+            {
+                tempIsAllInitalized = false;
+                break;
+            }
+        }
+        isAllInitalized = tempIsAllInitalized;
     }
 
     void ProcessUserInput()
@@ -128,6 +144,7 @@ public class InfiniteTerrain : MonoBehaviour
 
     void UpdateVisibleChunks()
     {
+        isAllInitalized = false;
         for(int i = 0; i < lastVisibleTerrainChunks.Count; i++)
         {
             lastVisibleTerrainChunks[i].SetVisible(false);
@@ -165,6 +182,8 @@ public class InfiniteTerrain : MonoBehaviour
         Vector2 position;
         Bounds bounds;
 
+        GameObject groupedParent;
+
         MeshRenderer meshRenderer;
         MeshFilter meshFilter;
         MeshCollider meshCollider;
@@ -184,6 +203,9 @@ public class InfiniteTerrain : MonoBehaviour
 
         int previousLODIndex = -1;
 
+        public bool isInitialized = false;
+        int chunkSize;
+
         public TerrainChunk(Vector2 coord, int size, LODInfo[] LODDetails, Transform parent, Material material, float scale, 
             AnimationCurve regionHeightCurve, GameObject waterPrefab, bool isInGodMode)
         {
@@ -191,20 +213,25 @@ public class InfiniteTerrain : MonoBehaviour
             position = coord * size;
             bounds = new Bounds(position, Vector2.one * size);
             Vector3 positionV3 = new Vector3(position.x, 0, position.y);
+            chunkSize = size;
+
+            groupedParent = new GameObject("Grouped Parent");
+
             meshObject = new GameObject("Terrain Chunk");
             meshRenderer = meshObject.AddComponent<MeshRenderer>();
             meshFilter = meshObject.AddComponent<MeshFilter>();
             meshCollider = meshObject.AddComponent<MeshCollider>();
             meshRenderer.material = material;
 
-            meshObject.transform.position = positionV3 * scale;
-            meshObject.transform.parent = parent;
+            groupedParent.transform.position = positionV3 * scale;
+            groupedParent.transform.parent = parent;
+            meshObject.transform.parent = groupedParent.transform;
             meshObject.transform.localScale = Vector3.one * scale;
+            meshObject.transform.localPosition = Vector3.zero;
 
             Vector2 boundSizes = new Vector2(size, size);
 
-            water = ProceduralMeshTerrain.CreateWater(boundSizes, waterPrefab, regionHeightCurve, meshObject.transform);
-            //cloud = meshTerrainGenerator.CreateCloud(boundSizes, regionHeightCurve, meshObject.transform, noiseMap);
+            water = ProceduralMeshTerrain.CreateWater(boundSizes, waterPrefab, regionHeightCurve, groupedParent.transform);
             SetVisible(false);
 
             trees = new Dictionary<Vector2, GameObject>();
@@ -301,6 +328,12 @@ public class InfiniteTerrain : MonoBehaviour
                     {
                         previousLODIndex = lodIndex;
                         meshFilter.mesh = lodMesh.mesh;
+                        meshTerrainGenerator.CreateCloud(new Vector2(chunkSize - 1, chunkSize - 1), groupedParent.transform, noiseMap);
+
+                        if(lodIndex != 0)
+                        {
+                            isInitialized = true;
+                        }
                     }
                     else if (!lodMesh.hasRequestedMesh)
                     {
@@ -314,6 +347,15 @@ public class InfiniteTerrain : MonoBehaviour
                     {
                         meshCollider.sharedMesh = collisionLODMesh.mesh;
                         meshCollider.enabled = true;
+
+                        if(collisionLODMesh.hasReceivedTreeData)
+                        {
+                            isInitialized = true;
+                        }
+                        else if(!collisionLODMesh.hasRequestedTreeData)
+                        {
+                           collisionLODMesh.RequestTreeData();
+                        }
                     }
                     else if (!collisionLODMesh.hasRequestedMesh)
                     {
@@ -337,7 +379,7 @@ public class InfiniteTerrain : MonoBehaviour
 
         public void SetVisible(bool visible)
         {
-            meshObject.SetActive(visible);
+            groupedParent.SetActive(visible);
         }
 
         public bool IsVisible()
@@ -358,10 +400,13 @@ public class InfiniteTerrain : MonoBehaviour
         public Mesh mesh;
         public bool hasRequestedMesh;
         public bool hasReceivedMesh;
+        public bool hasRequestedTreeData;
+        public bool hasReceivedTreeData;
         int levelOfDetail;
         Action updateCallback;
         Transform parent;
         Dictionary<Vector2, GameObject> trees;
+        MeshData meshData;
         public LODMesh(int levelOfDetail, Transform parentChunk, Dictionary<Vector2, GameObject> trees, Action callback)
         {
             mesh = new Mesh();
@@ -375,27 +420,22 @@ public class InfiniteTerrain : MonoBehaviour
         {
             MeshGenerator.CreateMesh(mesh, meshData);
             hasReceivedMesh = true;
-            if (levelOfDetail == 0)
-            {
-                meshTerrainGenerator.RequestTreeData(meshData, parent, trees, OnTreeDataReceived);
-            }
-            else
-            {
-                updateCallback();
-            }
+            this.meshData = meshData;
+            updateCallback();
         }
 
         void OnTreeDataReceived(Dictionary<Vector2, Vector3> treePositions, GameObject treePrefab, float[,] noiseMap)
         {
-            if(levelOfDetail == 0)
-            {
-                meshTerrainGenerator.ClearTrees(trees, noiseMap);
-                ProceduralMeshTerrain.InstantiateTrees(treePositions, trees, treePrefab, parent);
-
-                float chunkSize = mesh.bounds.size.x;
-                meshTerrainGenerator.CreateCloud(new Vector2(chunkSize - 1, chunkSize - 1), parent, noiseMap);
-            }
+            meshTerrainGenerator.ClearTrees(trees, noiseMap);
+            ProceduralMeshTerrain.InstantiateTrees(treePositions, trees, treePrefab, parent);
+            hasReceivedTreeData = true;
             updateCallback();
+        }
+
+        public void RequestTreeData()
+        {
+            meshTerrainGenerator.RequestTreeData(meshData, parent, trees, OnTreeDataReceived);
+            hasRequestedTreeData = true;
         }
 
         public void RequestMeshData(float[,] noiseMap)
