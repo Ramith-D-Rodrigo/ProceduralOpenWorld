@@ -30,6 +30,8 @@ public class ProceduralMeshTerrain : MonoBehaviour
     public List<Octave> octaves = new List<Octave>();
 
     public List<TerrainType> regions;
+    private Dictionary<string, int> regionNameDictionary = new Dictionary<string, int>();
+    public Dictionary<string,int> RegionNameDictionary { get { return regionNameDictionary; } }
 
     Mesh mesh;
     MeshFilter meshFilter;
@@ -97,6 +99,11 @@ public class ProceduralMeshTerrain : MonoBehaviour
 
     void Start()
     {
+        //populate the dictionary
+        for(int i = 0; i < regions.Count; i++)
+        {
+            regionNameDictionary.Add(regions[i].regionName, i);
+        }
 
         mesh = new Mesh();
         if(!useThreading)
@@ -336,8 +343,8 @@ public class ProceduralMeshTerrain : MonoBehaviour
         {
             return;
         }
-        lowTreeHeightBoundary = regions[4].height;
-        highTreeHeightBoundary = regions[5].height;
+        lowTreeHeightBoundary = regions[regionNameDictionary["Forest"]].height;
+        highTreeHeightBoundary = regions[regionNameDictionary["Mud"]].height;
     }
 
     public void ClearTrees(Dictionary<Vector2, GameObject> trees, float[,] noiseMap)

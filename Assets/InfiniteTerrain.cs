@@ -39,9 +39,11 @@ public class InfiniteTerrain : MonoBehaviour
     static ProceduralMeshTerrain meshTerrainGenerator;
 
     public bool isAllInitalized = false;
+    static NPCInitiator npcInitiator;
 
     void Start()
     {
+        npcInitiator = GetComponent<NPCInitiator>();
         meshTerrainGenerator = GetComponent<ProceduralMeshTerrain>();
         if (!meshTerrainGenerator.useThreading)
         {
@@ -68,7 +70,7 @@ public class InfiniteTerrain : MonoBehaviour
             return;
         }
 
-        ProcessUserInput();
+        //ProcessUserInput();
 
         viewerPosition = new Vector2(currentViewTransform.position.x, currentViewTransform.position.z) / scale;
         float viewerPositionOffset = (prevViewerPosition - viewerPosition).sqrMagnitude;
@@ -183,9 +185,13 @@ public class InfiniteTerrain : MonoBehaviour
         Bounds bounds;
 
         GameObject groupedParent;
+        public GameObject Parent { get { return groupedParent; } }
 
         MeshRenderer meshRenderer;
+
         MeshFilter meshFilter;
+        public MeshFilter MeshFilter { get { return meshFilter; } }
+
         MeshCollider meshCollider;
 
         LODInfo[] detailLevels;
@@ -193,18 +199,24 @@ public class InfiniteTerrain : MonoBehaviour
         LODMesh collisionLODMesh;
 
         GameObject water;
+        public GameObject Water { get { return water; } }
         GameObject cloud;
 
         Dictionary<Vector2, GameObject> trees;
         public Dictionary<Vector2, GameObject> Trees { get { return trees; } }
 
         float[,] noiseMap;
+        public float[,] NoiseMap { get { return noiseMap; } }
+
         bool hasReceivedMapData;
 
         int previousLODIndex = -1;
 
         public bool isInitialized = false;
         int chunkSize;
+
+        bool hasFishingGuy = false;
+        bool hasSwimmingGirl = false;
 
         public TerrainChunk(Vector2 coord, int size, LODInfo[] LODDetails, Transform parent, Material material, float scale, 
             AnimationCurve regionHeightCurve, GameObject waterPrefab, bool isInGodMode)
@@ -232,6 +244,7 @@ public class InfiniteTerrain : MonoBehaviour
             Vector2 boundSizes = new Vector2(size, size);
 
             water = ProceduralMeshTerrain.CreateWater(boundSizes, waterPrefab, regionHeightCurve, groupedParent.transform);
+            cloud = null;
             SetVisible(false);
 
             trees = new Dictionary<Vector2, GameObject>();
@@ -328,8 +341,10 @@ public class InfiniteTerrain : MonoBehaviour
                     {
                         previousLODIndex = lodIndex;
                         meshFilter.mesh = lodMesh.mesh;
-                        meshTerrainGenerator.CreateCloud(new Vector2(chunkSize - 1, chunkSize - 1), groupedParent.transform, noiseMap);
-
+                        if(cloud == null)
+                        {
+                            cloud = meshTerrainGenerator.CreateCloud(new Vector2(chunkSize - 1, chunkSize - 1), groupedParent.transform, noiseMap);
+                        }
                         if(lodIndex != 0)
                         {
                             isInitialized = true;
@@ -351,6 +366,7 @@ public class InfiniteTerrain : MonoBehaviour
                         if(collisionLODMesh.hasReceivedTreeData)
                         {
                             isInitialized = true;
+                            PopulateNPCs();
                         }
                         else if(!collisionLODMesh.hasRequestedTreeData)
                         {
@@ -369,12 +385,75 @@ public class InfiniteTerrain : MonoBehaviour
                     {
                         meshCollider.enabled = false;
                     }
+
+                    if(hasFishingGuy)
+                    {
+
+                       hasFishingGuy = false;
+                       npcInitiator.RemoveNPC(NPCType.FishingGuy);
+                    }
+
+                    if(hasSwimmingGirl)
+                    {
+                        hasSwimmingGirl = false;
+                        npcInitiator.RemoveNPC(NPCType.SwimmingGirl);
+                    }
                 }
 
                 lastVisibleTerrainChunks.Add(this);
             }
 
             SetVisible(isVisible);
+        }
+
+        public void PopulateNPCs() //to access the other terrain chunks
+        {
+            //the chunk that is calling this method is the center chunk (0, 0)
+
+            //first add a fishing guy
+            if(!hasFishingGuy && UnityEngine.Random.Range(0, 100) % 3 == 0)
+            {
+                //fishing guy should be near the water
+                //use noise map to determine the position
+                //find a position near the water
+                TerrainType water = meshTerrainGenerator.regions[meshTerrainGenerator.RegionNameDictionary["Grass"]];
+                TerrainType beach = meshTerrainGenerator.regions[meshTerrainGenerator.RegionNameDictionary["Forest"]];
+
+                float lowBoundary = water.height;
+                float highBoundary = beach.height - 0.15f;
+                int mapChunkSize = ProceduralMeshTerrain.mapChunkSize;
+
+                GameObject spawned = npcInitiator.SpawnNPC(NPCType.FishingGuy, mapChunkSize, this, lowBoundary, highBoundary);
+                if(!spawned)
+                {
+
+                   hasFishingGuy = false;
+                }
+                else
+                {
+                    hasFishingGuy = true;
+                }
+            }
+
+            //second add a swimming girl
+            if (!hasSwimmingGirl && UnityEngine.Random.Range(0, 100) % 3 == 0)
+            {
+                // should be on the water
+                //use noise map to determine the position
+                TerrainType deepWater = meshTerrainGenerator.regions[meshTerrainGenerator.RegionNameDictionary["DeepWater"]];
+                TerrainType water = meshTerrainGenerator.regions[meshTerrainGenerator.RegionNameDictionary["Water"]];
+
+                GameObject spawned = npcInitiator.SpawnNPC(NPCType.SwimmingGirl, ProceduralMeshTerrain.mapChunkSize,
+                    this, deepWater.height, water.height);
+                if (!spawned)
+                {
+                    hasSwimmingGirl = false;
+                }
+                else
+                {
+                    hasSwimmingGirl = true;
+                }
+            }
         }
 
         public void SetVisible(bool visible)

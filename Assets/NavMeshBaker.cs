@@ -38,7 +38,8 @@ public class NavMeshBaker : MonoBehaviour
         WaitForSeconds waitForSeconds = new(updateRate);
         while(true)
         {
-            if(Vector3.Distance(player.position, worldAnchor) > movementThreshold)
+            float sqrDistance = (player.position - worldAnchor).sqrMagnitude;
+            if(sqrDistance > movementThreshold * movementThreshold)
             {
                 if(infiniteTerrain.isAllInitalized)
                 {
@@ -81,18 +82,15 @@ public class NavMeshBaker : MonoBehaviour
             }
         }
 
-        if(buildSources.Count == 0)
-        {
-            if (surface.collectObjects == CollectObjects.Children)
-            {
-                NavMeshBuilder.CollectSources(surface.transform, surface.layerMask, surface.useGeometry, surface.defaultArea, markups, buildSources);
-            }
-            else
-            {
-                NavMeshBuilder.CollectSources(bounds, surface.layerMask, surface.useGeometry, surface.defaultArea, markups, buildSources);
-            }
-        }
 
+        if (surface.collectObjects == CollectObjects.Children)
+        {
+            NavMeshBuilder.CollectSources(surface.transform, surface.layerMask, surface.useGeometry, surface.defaultArea, markups, buildSources);
+        }
+        else
+        {
+            NavMeshBuilder.CollectSources(bounds, surface.layerMask, surface.useGeometry, surface.defaultArea, markups, buildSources);
+        }
 
         if (async)
         {
