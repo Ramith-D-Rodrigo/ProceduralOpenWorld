@@ -35,7 +35,6 @@ public class NavMeshBaker : MonoBehaviour
 
     IEnumerator CheckPlayerMovement()
     {
-        yield return new WaitForSeconds(1.0f);
         WaitForSeconds waitForSeconds = new(updateRate);
         while(true)
         {
@@ -102,6 +101,7 @@ public class NavMeshBaker : MonoBehaviour
         else
         {
             NavMeshBuilder.UpdateNavMeshData(navMeshData, surface.GetBuildSettings(), buildSources, bounds);
+            Debug.Log("NavMesh baked!");
         }
     }
 }
