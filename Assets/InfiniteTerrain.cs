@@ -365,8 +365,17 @@ public class InfiniteTerrain : MonoBehaviour
 
                         if(collisionLODMesh.hasReceivedTreeData)
                         {
-                            isInitialized = true;
-                            PopulateNPCs();
+                            if (collisionLODMesh.hasReceivedNPCData)
+                            {
+                                isInitialized = true;
+                            }
+                            else if(!collisionLODMesh.hasRequestedNPCData)
+                            {
+                                collisionLODMesh.RequestNPCData(
+                                  ProceduralMeshTerrain.mapChunkSize,
+                                  this,
+                                  meshTerrainGenerator);
+                            }
                         }
                         else if(!collisionLODMesh.hasRequestedTreeData)
                         {
@@ -385,75 +394,12 @@ public class InfiniteTerrain : MonoBehaviour
                     {
                         meshCollider.enabled = false;
                     }
-
-                    if(hasFishingGuy)
-                    {
-
-                       hasFishingGuy = false;
-                       npcInitiator.RemoveNPC(NPCType.FishingGuy);
-                    }
-
-                    if(hasSwimmingGirl)
-                    {
-                        hasSwimmingGirl = false;
-                        npcInitiator.RemoveNPC(NPCType.SwimmingGirl);
-                    }
                 }
 
                 lastVisibleTerrainChunks.Add(this);
             }
 
             SetVisible(isVisible);
-        }
-
-        public void PopulateNPCs() //to access the other terrain chunks
-        {
-            //the chunk that is calling this method is the center chunk (0, 0)
-
-            //first add a fishing guy
-            if(!hasFishingGuy && UnityEngine.Random.Range(0, 100) % 3 == 0)
-            {
-                //fishing guy should be near the water
-                //use noise map to determine the position
-                //find a position near the water
-                TerrainType water = meshTerrainGenerator.regions[meshTerrainGenerator.RegionNameDictionary["Grass"]];
-                TerrainType beach = meshTerrainGenerator.regions[meshTerrainGenerator.RegionNameDictionary["Forest"]];
-
-                float lowBoundary = water.height;
-                float highBoundary = beach.height - 0.15f;
-                int mapChunkSize = ProceduralMeshTerrain.mapChunkSize;
-
-                GameObject spawned = npcInitiator.SpawnNPC(NPCType.FishingGuy, mapChunkSize, this, lowBoundary, highBoundary);
-                if(!spawned)
-                {
-
-                   hasFishingGuy = false;
-                }
-                else
-                {
-                    hasFishingGuy = true;
-                }
-            }
-
-            //second add a swimming girl
-            if (!hasSwimmingGirl && UnityEngine.Random.Range(0, 100) % 3 == 0)
-            {
-                // should be on the water
-                //use noise map to determine the position
-                TerrainType deepWater = meshTerrainGenerator.regions[meshTerrainGenerator.RegionNameDictionary["DeepWater"]];
-                TerrainType water = meshTerrainGenerator.regions[meshTerrainGenerator.RegionNameDictionary["Water"]];
-
-                GameObject spawned = npcInitiator.SpawnNPC(NPCType.SwimmingGirl, ProceduralMeshTerrain.mapChunkSize,
-                    this, deepWater.height, water.height);
-                if (!spawned)
-                {
-                    hasSwimmingGirl = false;
-                }
-                else
-                {
-                    hasSwimmingGirl = true;
-                }
-            }
         }
 
         public void SetVisible(bool visible)
@@ -481,6 +427,9 @@ public class InfiniteTerrain : MonoBehaviour
         public bool hasReceivedMesh;
         public bool hasRequestedTreeData;
         public bool hasReceivedTreeData;
+        public bool hasRequestedNPCData;
+        public bool hasReceivedNPCData;
+
         int levelOfDetail;
         Action updateCallback;
         Transform parent;
@@ -522,6 +471,32 @@ public class InfiniteTerrain : MonoBehaviour
             meshTerrainGenerator.RequestMeshData(noiseMap, levelOfDetail, OnMeshDataReceived);
             hasRequestedMesh = true;
         }
+
+        public void RequestNPCData(int mapChunkSize, TerrainChunk terrainChunk, ProceduralMeshTerrain proceduralMeshTerrain)
+        {
+            npcInitiator.RequestNPCData(mapChunkSize,
+                terrainChunk.NoiseMap,
+                terrainChunk.MeshFilter.mesh.vertices,
+                terrainChunk.Water.transform.localPosition,
+                proceduralMeshTerrain, 
+                OnReceivedNPCData);
+            hasRequestedNPCData = true;
+        }
+
+        public void OnReceivedNPCData(Dictionary<NPCType, PositionAndRotation> npcPositionAndRotations)
+        {
+            foreach (KeyValuePair<NPCType, PositionAndRotation> npcPositionAndRotation in npcPositionAndRotations)
+            {
+                Vector3 localPos = npcPositionAndRotation.Value.position;
+                Quaternion rotation = npcPositionAndRotation.Value.rotation;
+
+                GameObject npc = npcInitiator.SpawnNPC(npcPositionAndRotation.Key, localPos, rotation, parent.transform.parent);
+            }
+            hasReceivedNPCData = true;
+            updateCallback();
+        }
+
+
     }
 
     [System.Serializable]

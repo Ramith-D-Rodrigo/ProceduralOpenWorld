@@ -9,7 +9,7 @@ using UnityEngine.AI;
 
 public class ProceduralMeshTerrain : MonoBehaviour
 {
-    public const int mapChunkSize = 239;
+    public const int mapChunkSize = 239; //239 because of our lod formula
 
     [Range(0,6)]
     public int previewLOD;
