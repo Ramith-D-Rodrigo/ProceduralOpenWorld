@@ -1897,6 +1897,7 @@ GameObject:
   - component: {fileID: 8190538832221998898}
   - component: {fileID: 3372044834638516200}
   - component: {fileID: 9009560802721908180}
+  - component: {fileID: 2807847993989976474}
   m_Layer: 0
   m_Name: Fishing Guy
   m_TagString: Untagged
@@ -1964,6 +1965,27 @@ CapsuleCollider:
   m_Height: 4.5
   m_Direction: 1
   m_Center: {x: 0, y: 1.7054727, z: 0}
+--- !u!135 &2807847993989976474
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5353142665061795346}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 4
+  m_Center: {x: 0, y: 2, z: 0}
 --- !u!1 &5417680847501466159
 GameObject:
   m_ObjectHideFlags: 0
