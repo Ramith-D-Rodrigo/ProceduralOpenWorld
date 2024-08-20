@@ -22,21 +22,6 @@ public class AILocomotion : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        timer -= Time.deltaTime;
 
-
-        if(agent.isOnNavMesh)
-        {
-            if (timer < 0.0f)
-            {
-                float sqrDistance = (playerTransform.position - agent.destination).sqrMagnitude;
-                if (sqrDistance > maxDistance * maxDistance)
-                {
-                    agent.SetDestination(playerTransform.position);
-                }
-                timer = maxTime;
-            }
-            animator.SetFloat("Speed", agent.velocity.magnitude);
-        }
     }
 }
