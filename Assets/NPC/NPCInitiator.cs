@@ -13,6 +13,8 @@ public class NPCInitiator : MonoBehaviour
     public GameObject grannyPrefab;
     public GameObject swimmingGirlPrefab;
 
+    public NPCDialogSystem dialogSystem;
+
     ConcurrentQueue<NPCThreadInfo> npcThreadInfos = new ConcurrentQueue<NPCThreadInfo>();
     System.Random random;
 
@@ -67,6 +69,7 @@ public class NPCInitiator : MonoBehaviour
                 break;
         }
 
+        npc.GetComponent<NPC>().dialogSystem = dialogSystem;
         return npc;
     }
 

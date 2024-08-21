@@ -22,12 +22,15 @@ public class KidNPC : NPC
         SphereCollider = GetComponent<SphereCollider>();
 
         type = NPCType.Kid;
-        base.Start();
+
+        stateMachine = new NPCStateMachine(this);
         RegisterStates();
+        stateMachine.ChangeState(initialState);
     }
 
     new protected void RegisterStates()
     {
+        stateMachine.RegisterState(new IdleState());
         stateMachine.RegisterState(new ScaredState());
         stateMachine.RegisterState(new FollowState());
     }

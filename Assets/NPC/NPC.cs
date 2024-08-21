@@ -13,10 +13,13 @@ public class NPC : MonoBehaviour
     // Start is called before the first frame update
     protected void Start()
     {
-        stateMachine = new NPCStateMachine(this);
-        dialogSystem = GetComponent<NPCDialogSystem>();
-        RegisterStates();
-        stateMachine.ChangeState(initialState);
+        //The following lines must be in child class's Start method in that order
+        //we have to override the Start method because RegisterStates can be different for each NPC
+        // and start method can vary for each NPC
+
+        //stateMachine = new NPCStateMachine(this);
+        //RegisterStates();
+        //stateMachine.ChangeState(initialState);
     }
 
     // Update is called once per frame

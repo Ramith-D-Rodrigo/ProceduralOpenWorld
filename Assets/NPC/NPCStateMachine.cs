@@ -39,4 +39,9 @@ public class NPCStateMachine
         currentState = newState;
         GetState(currentState).Enter(npc);
     }
+
+    public NPCStateId GetCurrentState()
+    {
+        return currentState;
+    }
 }

@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3905231008211235794}
   - component: {fileID: 3262283450425428225}
   - component: {fileID: 4601010866707454870}
+  - component: {fileID: 538793627382725533}
   m_Layer: 0
   m_Name: Swimming Girl
   m_TagString: Untagged
@@ -78,6 +79,21 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &538793627382725533
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 383368680210783278}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea55f79dd48e39c4e9c750bffd31daca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  initialState: 0
+  type: 3
+  dialogSystem: {fileID: 0}
 --- !u!1001 &5251315831494891251
 PrefabInstance:
   m_ObjectHideFlags: 0
