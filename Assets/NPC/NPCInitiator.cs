@@ -12,6 +12,7 @@ public class NPCInitiator : MonoBehaviour
     public GameObject kidPrefab;
     public GameObject grannyPrefab;
     public GameObject swimmingGirlPrefab;
+    public GameObject player;
 
     public NPCDialogSystem dialogSystem;
 
@@ -52,6 +53,8 @@ public class NPCInitiator : MonoBehaviour
                 npc.transform.localPosition = localPosition;
                 npc.transform.rotation = rotation;
                 npc.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);   //half the size
+                FishingGuyNPC fishingGuyNPC = npc.GetComponent<FishingGuyNPC>();
+                fishingGuyNPC.player = player;
                 break;
 
             case NPCType.Kid:

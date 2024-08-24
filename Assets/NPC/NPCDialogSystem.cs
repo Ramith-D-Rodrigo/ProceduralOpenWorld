@@ -10,6 +10,7 @@ public class NPCDialogSystem : MonoBehaviour
 
     public TextMeshProUGUI characterNameBox;
     public TextMeshProUGUI dialogBox;
+    public TextMeshProUGUI nextButtonText;
 
     private Dictionary<NPCType, List<(string, string)>[]> npcDialogs = new Dictionary<NPCType, List<(string, string)>[]>();
     //List<string> SwimmingGirlConversation = new List<string>();
@@ -20,6 +21,7 @@ public class NPCDialogSystem : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        nextButtonText.text += " " + interactKey.ToString();
         SetupConversations();
         gameObject.SetActive(false);
     }
