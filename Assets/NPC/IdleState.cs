@@ -4,23 +4,27 @@ using UnityEngine;
 
 public class IdleState : NPCState
 {
-    void NPCState.Enter(NPC npc)
+    public void Enter(NPC npc)
     {
 
     }
 
-    void NPCState.Exit(NPC npc)
+    public void Exit(NPC npc)
     {
 
     }
 
-    NPCStateId NPCState.GetId()
+    public NPCStateId GetId()
     {
         return NPCStateId.Idle;
     }
 
-    void NPCState.Update(NPC npc)
+    public void Update(NPC npc)
     {
-
+        if(npc.IsWithinTalkRange && Input.GetKeyDown(NPCDialogSystem.interactKey))
+        {
+            npc.player.StopAllMovements();
+            npc.stateMachine.ChangeState(NPCStateId.Talk);
+        }
     }
 }

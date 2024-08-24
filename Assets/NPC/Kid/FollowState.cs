@@ -29,10 +29,10 @@ public class FollowState : NPCState
         {
             if (kidNPC.timer < 0.0f)
             {
-                float sqrDistance = (kidNPC.playerTransform.position - kidNPC.agent.destination).sqrMagnitude;
+                float sqrDistance = (kidNPC.player.CurrentTransform.position - kidNPC.agent.destination).sqrMagnitude;
                 if (sqrDistance > kidNPC.maxDistance * kidNPC.maxDistance)
                 {
-                    kidNPC.agent.SetDestination(kidNPC.playerTransform.position);
+                    kidNPC.agent.SetDestination(kidNPC.player.CurrentTransform.position);
                 }
                 kidNPC.timer = kidNPC.maxTime;
             }

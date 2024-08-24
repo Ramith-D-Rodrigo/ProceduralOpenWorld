@@ -12,7 +12,7 @@ public class NPCInitiator : MonoBehaviour
     public GameObject kidPrefab;
     public GameObject grannyPrefab;
     public GameObject swimmingGirlPrefab;
-    public GameObject player;
+    public Player player;
 
     public NPCDialogSystem dialogSystem;
 

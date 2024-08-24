@@ -14,7 +14,7 @@ public class InfiniteTerrain : MonoBehaviour
     public static float maxViewDistance;
     public LODInfo[] detailLevels;
 
-    public Transform player;
+    public Player player;
     public Transform freeView;
     public HUDOptions hUDOptions;
 
@@ -50,7 +50,7 @@ public class InfiniteTerrain : MonoBehaviour
             return;
         }
 
-        SwitchView();
+        currentViewTransform = player.CurrentTransform;
 
         maxViewDistance = detailLevels[detailLevels.Length - 1].visibleDistThreshold;
 
@@ -92,35 +92,6 @@ public class InfiniteTerrain : MonoBehaviour
         isAllInitalized = tempIsAllInitalized;
     }
 
-    void ProcessUserInput()
-    {
-        if(Input.GetKeyDown(KeyCode.G))
-        {
-            meshTerrainGenerator.IsInGodMode = !meshTerrainGenerator.IsInGodMode;
-            SwitchView();
-        }
-    }
-
-    void SwitchView()
-    {
-        if (meshTerrainGenerator.IsInGodMode)
-        {
-            hUDOptions.gameObject.SetActive(true);
-            currentViewTransform = freeView;
-            player.parent.gameObject.SetActive(false);
-            freeView.gameObject.SetActive(true);
-            ToggleCollisionsOnChunks(false);
-        }
-        else
-        {
-            hUDOptions.gameObject.SetActive(false);
-            currentViewTransform = player;
-            player.parent.gameObject.SetActive(true);
-            freeView.gameObject.SetActive(false);
-            ToggleCollisionsOnChunks(true);
-
-        }
-    }
 
     public void OnValuesChanged()
     {

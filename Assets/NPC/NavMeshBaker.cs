@@ -10,7 +10,7 @@ public class NavMeshBaker : MonoBehaviour
     NavMeshSurface surface;
     InfiniteTerrain infiniteTerrain;
 
-    public Transform player;
+    public Player player;
 
     public float updateRate = 0.5f;
     public float movementThreshold = 75;
@@ -38,13 +38,13 @@ public class NavMeshBaker : MonoBehaviour
         WaitForSeconds waitForSeconds = new(updateRate);
         while(true)
         {
-            float sqrDistance = (player.position - worldAnchor).sqrMagnitude;
+            float sqrDistance = (player.CurrentTransform.position - worldAnchor).sqrMagnitude;
             if(sqrDistance > movementThreshold * movementThreshold)
             {
                 if(infiniteTerrain.isAllInitalized)
                 {
                     BuildNavMesh(true);
-                    worldAnchor = player.position;
+                    worldAnchor = player.CurrentTransform.position;
                 }
             }
             yield return waitForSeconds;
@@ -53,7 +53,7 @@ public class NavMeshBaker : MonoBehaviour
 
     private void BuildNavMesh(bool async)
     {
-        Bounds bounds = new Bounds(player.position, navMeshSize);
+        Bounds bounds = new Bounds(player.CurrentTransform.position, navMeshSize);
 
         if(markups.Count == 0)
         {

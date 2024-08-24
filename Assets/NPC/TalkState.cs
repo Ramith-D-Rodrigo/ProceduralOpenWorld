@@ -23,6 +23,14 @@ public class TalkState : NPCState
 
     public void Update(NPC npc)
     {
-
+        if(Input.GetKeyDown(NPCDialogSystem.interactKey))
+        {
+            bool canContinue = npc.dialogSystem.DisplayNextDialog();
+            if (!canContinue)
+            {
+                npc.stateMachine.ChangeState(NPCStateId.Idle);
+                npc.player.EnableAllMovements();
+            }
+        }
     }
 }

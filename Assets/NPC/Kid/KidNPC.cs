@@ -5,7 +5,6 @@ using UnityEngine.AI;
 
 public class KidNPC : NPC
 {
-    public Transform playerTransform;
     public float maxTime = 1.0f;
     public float maxDistance = 2.0f;
 

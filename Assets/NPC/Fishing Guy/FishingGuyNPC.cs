@@ -7,7 +7,6 @@ public class FishingGuyNPC : NPC
 {
     bool isWithinRange = false;
 
-    public GameObject player;
     // Start is called before the first frame update
     void Start()
     {
@@ -20,23 +19,14 @@ public class FishingGuyNPC : NPC
     // Update is called once per frame
     void Update()
     {
+        base.Update();
         if(isWithinRange)
         {
             if (Input.GetKeyDown(NPCDialogSystem.interactKey) && stateMachine.GetCurrentState() != NPCStateId.Talk)
             {
-                player.GetComponent<ThirdPersonController>().enabled = false;
-                player.GetComponent<Animator>().SetFloat("Speed", 0.0f);
+                player.StopAllMovements();
                 //change the state to talk
                 stateMachine.ChangeState(NPCStateId.Talk);
-            }
-            else if (Input.GetKeyDown(NPCDialogSystem.interactKey) && stateMachine.GetCurrentState() == NPCStateId.Talk)
-            {
-                bool canContinue = dialogSystem.DisplayNextDialog();
-                if (!canContinue)
-                {
-                    stateMachine.ChangeState(NPCStateId.Idle);
-                    player.GetComponent<ThirdPersonController>().enabled = true;
-                }
             }
         }
     }
@@ -51,7 +41,7 @@ public class FishingGuyNPC : NPC
     {
         if (other.tag == "Player")
         {
-            isWithinRange = true;
+            IsWithinTalkRange = true;
         }
     }
 
@@ -59,7 +49,7 @@ public class FishingGuyNPC : NPC
     {
         if (other.tag == "Player")
         {
-            isWithinRange = false;
+            IsWithinTalkRange = true;
         }
     }
 

@@ -4,12 +4,28 @@ using UnityEngine;
 
 public class NPC : MonoBehaviour
 {
+    public Player player;
+
     public NPCStateMachine stateMachine;
     public NPCStateId initialState;
 
     public NPCType type;
 
     public NPCDialogSystem dialogSystem;
+
+    bool isWithinTalkRange = false;
+    public bool IsWithinTalkRange
+    {
+        get
+        {
+            return isWithinTalkRange;
+        }
+        set
+        {
+            isWithinTalkRange = value;
+        }
+    }
+
     // Start is called before the first frame update
     protected void Start()
     {
@@ -23,7 +39,7 @@ public class NPC : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    protected void Update()
     {
         stateMachine.Update();
     }
