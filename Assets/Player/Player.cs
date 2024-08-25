@@ -92,8 +92,7 @@ public class Player : MonoBehaviour
             firstPersonAnimator.enabled = true;
             firstPersonGameObject.SetActive(true);
 
-            firstPersonTransform.position = thirdPersonTransform.position;
-            firstPersonTransform.rotation = thirdPersonTransform.rotation;
+            firstPersonTransform.SetPositionAndRotation(thirdPersonTransform.position, thirdPersonTransform.rotation);
         }
         else
         {
@@ -105,8 +104,7 @@ public class Player : MonoBehaviour
             thirdPersonAnimator.enabled = true;
             thirdPersonGameObject.SetActive(true);
 
-            thirdPersonTransform.position = firstPersonTransform.position;
-            thirdPersonTransform.rotation = firstPersonTransform.rotation;
+            thirdPersonTransform.SetPositionAndRotation(firstPersonTransform.position, firstPersonTransform.rotation);
         }
 
         isThirdPerson = !isThirdPerson;

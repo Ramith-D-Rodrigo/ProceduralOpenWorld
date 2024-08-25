@@ -2075,15 +2075,15 @@ PrefabInstance:
       objectReference: {fileID: 490576248673293054}
     - target: {fileID: 7849264782778700997, guid: bbd511c73e0defe408c2abf9a1573d47, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 40.416367
+      value: -10.4
       objectReference: {fileID: 0}
     - target: {fileID: 7849264782778700997, guid: bbd511c73e0defe408c2abf9a1573d47, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 8.338
+      value: 4.23
       objectReference: {fileID: 0}
     - target: {fileID: 7849264782778700997, guid: bbd511c73e0defe408c2abf9a1573d47, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 43.969658
+      value: 67.6
       objectReference: {fileID: 0}
     - target: {fileID: 7849264782778700997, guid: bbd511c73e0defe408c2abf9a1573d47, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2117,6 +2117,10 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 775477360}
+    - target: {fileID: 8305821106042066157, guid: bbd511c73e0defe408c2abf9a1573d47, type: 3}
+      propertyPath: dialogSystem
+      value: 
+      objectReference: {fileID: 1651014956}
     - target: {fileID: 8305821106042066157, guid: bbd511c73e0defe408c2abf9a1573d47, type: 3}
       propertyPath: playerTransform
       value: 

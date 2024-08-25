@@ -5,7 +5,7 @@ using UnityEngine.AI;
 
 public class KidNPC : NPC
 {
-    public float maxTime = 1.0f;
+    public float maxTime = 0.5f;
     public float maxDistance = 2.0f;
 
     public NavMeshAgent agent;
@@ -13,6 +13,8 @@ public class KidNPC : NPC
     public float timer = 0.0f;
 
     public SphereCollider SphereCollider;
+
+    public bool hasPlayerFound = false;
 
     new protected void Start()
     {
@@ -31,24 +33,25 @@ public class KidNPC : NPC
     {
         stateMachine.RegisterState(new IdleState());
         stateMachine.RegisterState(new ScaredState());
+        stateMachine.RegisterState(new TalkState());
         stateMachine.RegisterState(new FollowState());
+        stateMachine.RegisterState(new HappyState());
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.tag == "Player")
+        if(other.GetComponent<GrannyNPC>())
         {
-            stateMachine.ChangeState(NPCStateId.Follow);
+            stateMachine.ChangeState(NPCStateId.Happy);
         }
     }
 
-    private void OnTriggerExit(Collider other)
+    new private void OnTriggerExit(Collider other)
     {
-/*        Debug.Log("Trigger exit");
-        if(other == SphereCollider)
+        base.OnTriggerExit(other);
+        if (other.GetComponent<GrannyNPC>())
         {
-            Debug.Log("Trigger exit sphere");
-            stateMachine.ChangeState(NPCStateId.Scared);
-        }*/
+            stateMachine.ChangeState(NPCStateId.Follow);
+        }
     }
 }

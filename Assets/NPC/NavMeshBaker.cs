@@ -27,6 +27,9 @@ public class NavMeshBaker : MonoBehaviour
         surface = GetComponent<NavMeshSurface>();
         infiniteTerrain = GetComponent<InfiniteTerrain>();
 
+        //at the start world anchor is infinite in size
+        worldAnchor = Vector3.positiveInfinity;
+
         navMeshData = new NavMeshData();
         NavMesh.AddNavMeshData(navMeshData);
         BuildNavMesh(false);

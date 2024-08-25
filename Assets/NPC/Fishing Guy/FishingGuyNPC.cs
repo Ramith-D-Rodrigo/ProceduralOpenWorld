@@ -27,12 +27,4 @@ public class FishingGuyNPC : NPC
         stateMachine.RegisterState(new IdleState());
         stateMachine.RegisterState(new TalkState());
     }
-
-    private void OnTriggerStay(Collider other)
-    {
-        if (other.tag == "Player")
-        {
-
-        }
-    }
 }

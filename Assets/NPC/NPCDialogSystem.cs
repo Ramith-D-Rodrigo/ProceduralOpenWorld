@@ -85,6 +85,44 @@ public class NPCDialogSystem : MonoBehaviour
     public void SetupGrannyFoundKidConversation()
     {
         List<(string, string)> convo = new List<(string, string)>();
+        convo.Add(("Player", "I found your grandson!"));
+        convo.Add(("Granny", "Oh thank you so much!"));
+        convo.Add(("Granny", "I was so worried about him!"));
+        convo.Add(("Player", "No problem!"));
+        convo.Add(("Granny", "Here, take this as a token of my gratitude."));
+        convo.Add(("Player", "Thank you!"));
+
+        List<(string, string)>[] allConvos = {convo};
+        npcDialogs.Add(NPCType.Granny, allConvos);
+    }
+
+    public void SetupKidScaredConversation()
+    {
+        List<(string, string)> convo = new List<(string, string)>();
+        convo.Add(("Player", "Hey! Are you okay?"));
+        convo.Add(("Kid", "I'm scared!"));
+        convo.Add(("Player", "What happened?"));
+        convo.Add(("Kid", "I got lost and I don't know how to get back to my grandma."));
+        convo.Add(("Player", "Ohh so you're Granny's grandson?"));
+        convo.Add(("Kid", "Yes!"));
+        convo.Add(("Player", "Don't worry! I'll take you back to her!"));
+
+        List<(string, string)>[] allConvos = { convo };
+        npcDialogs.Add(NPCType.Kid, allConvos);
+    }
+
+    public void SetupKidFollowConversation()
+    {
+        List<(string, string)> convo1 = new List<(string, string)>();
+        convo1.Add(("Player", "Follow me."));
+        convo1.Add(("Kid", "Okay!"));
+
+        List<(string, string)> convo2 = new List<(string, string)>();
+        convo2.Add(("Kid", "Are we there yet?"));
+        convo2.Add(("Player", "Almost there!"));
+
+        List<(string, string)>[] allConvos = { convo1, convo2 };
+        npcDialogs.Add(NPCType.Kid, allConvos);
     }
 
     public void ClearConversation(NPCType npcType)

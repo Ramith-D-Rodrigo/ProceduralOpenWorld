@@ -10,7 +10,7 @@ public enum NPCStateId
     Happy,
     Talk,
     Search,
-    SearchProgress
+    Found
 }
 
 public interface NPCState

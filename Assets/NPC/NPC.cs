@@ -51,19 +51,20 @@ public class NPC : MonoBehaviour
         stateMachine.RegisterState(new TalkState());
     }
 
-    private void OnTriggerEnter(Collider other)
+    protected void OnTriggerStay(Collider other)
     {
         if (other.tag == "Player")
         {
-            IsWithinTalkRange = true;
+           IsWithinTalkRange = true;
         }
+
     }
 
-    private void OnTriggerExit(Collider other)
+    protected void OnTriggerExit(Collider other)
     {
         if (other.tag == "Player")
         {
-            IsWithinTalkRange = true;
+            IsWithinTalkRange = false;
         }
     }
 }

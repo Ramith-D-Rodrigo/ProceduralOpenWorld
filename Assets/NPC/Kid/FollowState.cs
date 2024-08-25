@@ -6,7 +6,12 @@ public class FollowState : NPCState
 {
     public void Enter(NPC npc, NPCStateId previousState)
     {
-
+        if (npc as KidNPC != null)
+        {
+            KidNPC kidNPC = npc as KidNPC;
+            kidNPC.dialogSystem.ClearConversation(npc.type);
+            kidNPC.dialogSystem.SetupKidFollowConversation();
+        }
     }
 
     public void Exit(NPC npc)
@@ -22,21 +27,31 @@ public class FollowState : NPCState
     public void Update(NPC npc)
     {
         KidNPC kidNPC = npc as KidNPC;
-        kidNPC.timer -= Time.deltaTime;
-
-
-        if (kidNPC.agent.isOnNavMesh)
+        if(kidNPC != null)
         {
-            if (kidNPC.timer < 0.0f)
+            kidNPC.timer -= Time.deltaTime;
+
+
+            if (kidNPC.agent.isOnNavMesh)
             {
-                float sqrDistance = (kidNPC.player.CurrentTransform.position - kidNPC.agent.destination).sqrMagnitude;
-                if (sqrDistance > kidNPC.maxDistance * kidNPC.maxDistance)
+                if (kidNPC.timer < 0.0f)
                 {
-                    kidNPC.agent.SetDestination(kidNPC.player.CurrentTransform.position);
+                    float sqrDistance = (kidNPC.player.CurrentTransform.position - kidNPC.agent.destination).sqrMagnitude;
+                    if (sqrDistance > kidNPC.maxDistance * kidNPC.maxDistance)
+                    {
+                        kidNPC.agent.SetDestination(kidNPC.player.CurrentTransform.position);
+                    }
+                    kidNPC.timer = kidNPC.maxTime;
+
                 }
-                kidNPC.timer = kidNPC.maxTime;
+                kidNPC.animator.SetFloat("Speed", kidNPC.agent.velocity.magnitude);
             }
-            kidNPC.animator.SetFloat("Speed", kidNPC.agent.velocity.magnitude);
+        }
+
+        if (npc.IsWithinTalkRange && Input.GetKeyDown(NPCDialogSystem.interactKey))
+        {
+            npc.player.StopAllMovements();
+            npc.stateMachine.ChangeState(NPCStateId.Talk);
         }
     }
 }
