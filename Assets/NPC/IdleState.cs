@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class IdleState : NPCState
 {
-    public void Enter(NPC npc)
+    public void Enter(NPC npc, NPCStateId previousState)
     {
 
     }

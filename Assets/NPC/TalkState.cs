@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class TalkState : NPCState
 {
-    public void Enter(NPC npc)
+    NPCStateId previousState;
+    public void Enter(NPC npc, NPCStateId previousState)
     {
-
+        this.previousState = previousState;
         int convoIndex = Random.Range(0, npc.dialogSystem.GetConversationCount(npc.type));
         npc.dialogSystem.StartConverstation(npc.type, convoIndex);
     }
@@ -28,7 +29,7 @@ public class TalkState : NPCState
             bool canContinue = npc.dialogSystem.DisplayNextDialog();
             if (!canContinue)
             {
-                npc.stateMachine.ChangeState(NPCStateId.Idle);
+                npc.stateMachine.ChangeState(previousState);
                 npc.player.EnableAllMovements();
             }
         }

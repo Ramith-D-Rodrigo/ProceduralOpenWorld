@@ -8,14 +8,16 @@ public enum NPCStateId
     Follow,
     Scared,
     Happy,
-    Talk
+    Talk,
+    Search,
+    SearchProgress
 }
 
 public interface NPCState
 {
     NPCStateId GetId();
 
-    void Enter(NPC npc);
+    void Enter(NPC npc, NPCStateId previousState);
     void Exit(NPC npc);
     void Update(NPC npc);
 }

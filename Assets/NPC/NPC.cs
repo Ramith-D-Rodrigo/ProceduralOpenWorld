@@ -50,4 +50,20 @@ public class NPC : MonoBehaviour
         stateMachine.RegisterState(new IdleState());
         stateMachine.RegisterState(new TalkState());
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Player")
+        {
+            IsWithinTalkRange = true;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.tag == "Player")
+        {
+            IsWithinTalkRange = true;
+        }
+    }
 }

@@ -35,10 +35,10 @@ public class NPCStateMachine
 
     public void ChangeState(NPCStateId newState)
     {
-        Debug.Log(npc.type);
         GetState(currentState).Exit(npc);
+        NPCStateId previousState = currentState;
         currentState = newState;
-        GetState(currentState).Enter(npc);
+        GetState(currentState).Enter(npc, previousState);
     }
 
     public NPCStateId GetCurrentState()

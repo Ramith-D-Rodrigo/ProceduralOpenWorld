@@ -42,7 +42,7 @@ public class NPCDialogSystem : MonoBehaviour
         List<(string, string)> convo1 = new List<(string, string)>();
         convo1.Add(("Player", "What are you doing?"));
         convo1.Add(("Fishing Guy", "I am fishing. What does it look like?"));
-        convo1.Add(("Player", "That doesn't look like a fishing rod"));
+        convo1.Add(("Player", "That doesn't look like a fishing rod."));
         convo1.Add(("Fishing Guy", "It's a special one. Leave me alone!"));
 
         List<(string, string)> convo2 = new List<(string, string)>();
@@ -51,6 +51,45 @@ public class NPCDialogSystem : MonoBehaviour
 
         List<(string, string)>[] allConvos = {convo1, convo2};
         npcDialogs.Add(NPCType.FishingGuy, allConvos);
+    }
+
+    public void SetupGrannySearchConversation()
+    {
+        List<(string, string)> convo = new List<(string, string)>();
+        convo.Add(("Player", "Hello!"));
+        convo.Add(("Granny", "Oh hello dear..."));
+        convo.Add(("Player", "Are you looking for something?"));
+        convo.Add(("Granny", "Actually, yes. I came here with my grandson, but he ran off somewhere and now I can't find him."));
+        convo.Add(("Player", "Mind if I go and look for him?"));
+        convo.Add(("Granny", "Oh, that would be wonderful! Thank you so much!"));
+        convo.Add(("Granny", "He's a small boy, wearing a cap. Also he likes to play in the woods."));
+        convo.Add(("Player", "I'll go and look for him. Don't worry!"));
+
+        List<(string, string)>[] allConvos = {convo};
+        npcDialogs.Add(NPCType.Granny, allConvos);
+    }
+
+    public void SetupGrannySearchProgressConversation()
+    {
+        List<(string, string)> convo = new List<(string, string)>();
+        convo.Add(("Granny", "Have you found my grandson yet?"));
+        convo.Add(("Player", "Not yet, but I'm still looking."));
+        convo.Add(("Granny", "Please hurry!"));
+        convo.Add(("Granny", "He's a small boy, wearing a cap. Also he likes to play in the woods."));
+        convo.Add(("Player", "Got it!"));
+
+        List<(string, string)>[] allConvos = {convo};
+        npcDialogs.Add(NPCType.Granny, allConvos);
+    }
+
+    public void SetupGrannyFoundKidConversation()
+    {
+        List<(string, string)> convo = new List<(string, string)>();
+    }
+
+    public void ClearConversation(NPCType npcType)
+    {
+        npcDialogs.Remove(npcType);
     }
 
     private List<(string, string)> GetConversation(NPCType npcType, int conversationIndex)
