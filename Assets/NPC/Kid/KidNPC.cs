@@ -9,7 +9,6 @@ public class KidNPC : NPC
     public float maxDistance = 2.0f;
 
     public NavMeshAgent agent;
-    public Animator animator;
     public float timer = 0.0f;
 
     public SphereCollider SphereCollider;

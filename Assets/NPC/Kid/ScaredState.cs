@@ -25,7 +25,7 @@ public class ScaredState : NPCState
 
     public void Update(NPC npc)
     {
-        if (npc.IsWithinTalkRange && Input.GetKeyDown(NPCDialogSystem.interactKey))
+        if (npc.IsWithinTalkRange && Input.GetKeyDown(NPCDialogSystem.interactKey) && npc.dialogSystem.CurrentConversation == null)
         {
             if (npc as KidNPC != null)
             {

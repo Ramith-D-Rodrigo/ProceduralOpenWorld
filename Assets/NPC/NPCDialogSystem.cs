@@ -16,6 +16,7 @@ public class NPCDialogSystem : MonoBehaviour
     //List<string> SwimmingGirlConversation = new List<string>();
 
     private List<(string, string)> currentConversation = null;
+    public List<(string, string)> CurrentConversation { get { return currentConversation; } }
     private int currentDialogIndex = 0;
 
     // Start is called before the first frame update

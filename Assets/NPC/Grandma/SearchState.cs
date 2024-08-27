@@ -16,6 +16,7 @@ public class SearchState : NPCState
             }
             else if (progressIncrement == 1)
             {
+                npc.animator.SetBool("hasAskedForHelp", true);
                 npc.dialogSystem.ClearConversation(npc.type);
                 npc.dialogSystem.SetupGrannySearchProgressConversation();
             }
@@ -37,7 +38,7 @@ public class SearchState : NPCState
 
     public void Update(NPC npc)
     {
-        if (npc.IsWithinTalkRange && Input.GetKeyDown(NPCDialogSystem.interactKey))
+        if (npc.IsWithinTalkRange && Input.GetKeyDown(NPCDialogSystem.interactKey) && npc.dialogSystem.CurrentConversation == null)
         {
             npc.player.StopAllMovements();
             npc.stateMachine.ChangeState(NPCStateId.Talk);

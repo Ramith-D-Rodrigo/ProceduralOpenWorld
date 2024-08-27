@@ -7,10 +7,13 @@ public class GrannyNPC : NPC
     // Start is called before the first frame update
 
     public bool hasPlayerFoundGrandSon = false;
+
     void Start()
     {
         type = NPCType.Granny;
         stateMachine = new NPCStateMachine(this);
+        animator = GetComponent<Animator>();
+
         RegisterStates();
         stateMachine.ChangeState(initialState);
     }

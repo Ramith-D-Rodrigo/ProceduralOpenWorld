@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6151030922104171296}
   - component: {fileID: 7284040078812250396}
   - component: {fileID: 5749018870800437964}
+  - component: {fileID: 4604119475108763020}
   m_Layer: 0
   m_Name: Granny
   m_TagString: Untagged
@@ -95,6 +96,28 @@ MonoBehaviour:
   initialState: 5
   type: 0
   dialogSystem: {fileID: 0}
+  hasPlayerFoundGrandSon: 0
+--- !u!95 &4604119475108763020
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6530337095230563396}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: 17fd88a75763c1c448c82f38ffe0f981, type: 3}
+  m_Controller: {fileID: 9100000, guid: 8fd892c1946cbfb4491fa3a573321cbd, type: 2}
+  m_CullingMode: 2
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &4875859601370079308
 PrefabInstance:
   m_ObjectHideFlags: 0

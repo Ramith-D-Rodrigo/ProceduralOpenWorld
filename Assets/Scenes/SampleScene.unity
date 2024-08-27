@@ -1118,7 +1118,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1071240581512232518, guid: 6cad074523ee00e4ea8f06d8344580a8, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 5.36
+      value: 5.2
       objectReference: {fileID: 0}
     - target: {fileID: 1071240581512232518, guid: 6cad074523ee00e4ea8f06d8344580a8, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2073,6 +2073,10 @@ PrefabInstance:
       propertyPath: playerTransform
       value: 
       objectReference: {fileID: 490576248673293054}
+    - target: {fileID: 7346811304627441666, guid: bbd511c73e0defe408c2abf9a1573d47, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7849264782778700997, guid: bbd511c73e0defe408c2abf9a1573d47, type: 3}
       propertyPath: m_LocalPosition.x
       value: -10.4

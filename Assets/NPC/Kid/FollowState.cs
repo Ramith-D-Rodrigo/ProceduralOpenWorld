@@ -9,8 +9,10 @@ public class FollowState : NPCState
         if (npc as KidNPC != null)
         {
             KidNPC kidNPC = npc as KidNPC;
+            npc.animator.SetBool("isFollowing", true);
             kidNPC.dialogSystem.ClearConversation(npc.type);
             kidNPC.dialogSystem.SetupKidFollowConversation();
+            kidNPC.gameObject.GetComponent<SphereCollider>().enabled = true; // enable the collider
         }
     }
 
@@ -48,7 +50,7 @@ public class FollowState : NPCState
             }
         }
 
-        if (npc.IsWithinTalkRange && Input.GetKeyDown(NPCDialogSystem.interactKey))
+        if (npc.IsWithinTalkRange && Input.GetKeyDown(NPCDialogSystem.interactKey) && npc.dialogSystem.CurrentConversation == null)
         {
             npc.player.StopAllMovements();
             npc.stateMachine.ChangeState(NPCStateId.Talk);

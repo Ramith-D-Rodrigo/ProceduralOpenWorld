@@ -21,7 +21,7 @@ public class IdleState : NPCState
 
     public void Update(NPC npc)
     {
-        if(npc.IsWithinTalkRange && Input.GetKeyDown(NPCDialogSystem.interactKey))
+        if(npc.IsWithinTalkRange && Input.GetKeyDown(NPCDialogSystem.interactKey) && npc.dialogSystem.CurrentConversation == null)
         {
             npc.player.StopAllMovements();
             npc.stateMachine.ChangeState(NPCStateId.Talk);

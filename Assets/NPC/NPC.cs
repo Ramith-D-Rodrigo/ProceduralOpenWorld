@@ -12,6 +12,7 @@ public class NPC : MonoBehaviour
     public NPCType type;
 
     public NPCDialogSystem dialogSystem;
+    public Animator animator;
 
     bool isWithinTalkRange = false;
     public bool IsWithinTalkRange
