@@ -28,7 +28,12 @@ public class SearchState : NPCState
 
     public void Exit(NPC npc)
     {
-        progressIncrement = 1;
+        GrannyNPC grannyNPC = npc as GrannyNPC;
+        if(progressIncrement == 0 && grannyNPC)
+        {
+            grannyNPC.grandSon.SetActive(true);
+            progressIncrement = 1;
+        }
     }
 
     public NPCStateId GetId()

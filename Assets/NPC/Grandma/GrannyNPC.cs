@@ -8,9 +8,14 @@ public class GrannyNPC : NPC
 
     public bool hasPlayerFoundGrandSon = false;
 
+    public GameObject grandSon;
+
     void Start()
     {
         type = NPCType.Granny;
+
+        grandSon.SetActive(false);
+
         stateMachine = new NPCStateMachine(this);
         animator = GetComponent<Animator>();
 
@@ -29,10 +34,6 @@ public class GrannyNPC : NPC
     new protected void Update()
     {
         base.Update();
-        if (hasPlayerFoundGrandSon)
-        {
-
-        }
     }
 
     private void OnTriggerEnter(Collider other)
