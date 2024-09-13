@@ -2,6 +2,7 @@ using StarterAssets;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit;
 
 public class Player : MonoBehaviour
 {
@@ -14,23 +15,44 @@ public class Player : MonoBehaviour
     public Animator firstPersonAnimator;
     public Transform firstPersonTransform;
     public GameObject firstPersonGameObject;
+    public GameObject firstPersonCamera;
+    public Transform firstPersonCameraRoot;
+
+    public GameObject XROrigin;
+    public GameObject XRCameraOffset;
+    public GameObject interactionManager;
+    public GameObject playerVR;
+    public Transform playerVRCameraPlacement;
+    private Vector3 XROriginPlacementOffset;
 
     KeyCode viewSwitchKey = KeyCode.V;
 
-    public bool isThirdPerson = true;
+    public enum PlayerView
+    {
+        ThirdPerson,
+        FirstPerson,
+        VR
+    }
+
+    public PlayerView currentView;
+    private PlayerView viewBeforeVR;
     private bool isMoving = true;
 
     public Transform CurrentTransform
     {
         get
         {
-            if(isThirdPerson)
+            if(currentView == PlayerView.ThirdPerson)
             {
                 return thirdPersonTransform;
             }
-            else
+            else if(currentView == PlayerView.FirstPerson)
             {
                 return firstPersonTransform;
+            }
+            else
+            {
+                return playerVR.transform;
             }
         }
     }
@@ -38,7 +60,15 @@ public class Player : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        thirdPersonController.enabled = true;
+        firstPersonController.enabled = false;
 
+        firstPersonGameObject.SetActive(false);
+        playerVR.SetActive(false);
+
+        XRCameraOffset.SetActive(false);
+
+        //StartCoroutine(TurnOffXROriginAfterSomeTime());
     }
 
     // Update is called once per frame
@@ -48,6 +78,12 @@ public class Player : MonoBehaviour
         {
             SwitchView();
         }
+    }
+
+    IEnumerator TurnOffXROriginAfterSomeTime()
+    {
+        yield return new WaitForSeconds(1.0f);
+        XROrigin.SetActive(false);
     }
 
     public void StopAllMovements()
@@ -66,11 +102,11 @@ public class Player : MonoBehaviour
 
     public void EnableAllMovements()
     {
-        if(isThirdPerson)
+        if(currentView == PlayerView.ThirdPerson)
         {
             thirdPersonController.enabled = true;
         }
-        else
+        else if(currentView == PlayerView.FirstPerson)
         {
             firstPersonController.enabled = true;
         }
@@ -82,7 +118,7 @@ public class Player : MonoBehaviour
     {
         StopAllMovements();
 
-        if (isThirdPerson)
+        if (currentView == PlayerView.ThirdPerson)
         {
             thirdPersonController.enabled = false;
             thirdPersonAnimator.enabled = false;
@@ -93,8 +129,10 @@ public class Player : MonoBehaviour
             firstPersonGameObject.SetActive(true);
 
             firstPersonTransform.SetPositionAndRotation(thirdPersonTransform.position, thirdPersonTransform.rotation);
+
+            currentView = PlayerView.FirstPerson;
         }
-        else
+        else if(currentView == PlayerView.FirstPerson)
         {
             firstPersonController.enabled = false;
             firstPersonAnimator.enabled = false;
@@ -105,10 +143,59 @@ public class Player : MonoBehaviour
             thirdPersonGameObject.SetActive(true);
 
             thirdPersonTransform.SetPositionAndRotation(firstPersonTransform.position, firstPersonTransform.rotation);
+
+            currentView = PlayerView.ThirdPerson;
         }
 
-        isThirdPerson = !isThirdPerson;
-
         isMoving = true;
+    }
+
+    public void EnableVR()
+    {
+        //disable all movements
+        StopAllMovements();
+
+        //disable all third person components
+        thirdPersonController.enabled = false;
+        thirdPersonAnimator.enabled = false;
+        thirdPersonGameObject.SetActive(false);
+
+        //disable the following first person components
+        firstPersonController.enabled = false;
+        firstPersonAnimator.enabled = false;
+        firstPersonGameObject.SetActive(false);
+
+        //enable VR components
+        XROrigin.transform.position = CurrentTransform.position;
+        XRCameraOffset.SetActive(true);
+        XROrigin.SetActive(true);
+        playerVR.SetActive(true);
+
+        viewBeforeVR = currentView;
+        currentView = PlayerView.VR;
+    }
+
+    public void DisableVR()
+    {
+        //disable VR components
+        XRCameraOffset.SetActive(false);
+        XROrigin.SetActive(false);
+        playerVR.SetActive(false);
+
+        //enable the following components based on the view before VR
+        if(viewBeforeVR == PlayerView.ThirdPerson)
+        {
+            thirdPersonController.enabled = true;
+            thirdPersonAnimator.enabled = true;
+            thirdPersonGameObject.SetActive(true);
+        }
+        else if(viewBeforeVR == PlayerView.FirstPerson)
+        {
+            firstPersonController.enabled = true;
+            firstPersonAnimator.enabled = true;
+            firstPersonGameObject.SetActive(true);
+        }
+
+        currentView = viewBeforeVR;
     }
 }

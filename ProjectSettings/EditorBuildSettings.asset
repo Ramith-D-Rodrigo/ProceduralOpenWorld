@@ -5,10 +5,13 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/SingleTerrain.unity
     guid: a8286c64c5b82dc44a6fdd799abb1597
   - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
-  m_configObjects: {}
+  m_configObjects:
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: f72fd5a4b97c4674e86eb18de4cdf06d, type: 2}
+    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 45a8aba05659fca47840a1911412775a, type: 2}
+    xr.sdk.mock-hmd.settings: {fileID: 11400000, guid: 9f7bf2866cddf3b4584294ed9761d9fc, type: 2}
