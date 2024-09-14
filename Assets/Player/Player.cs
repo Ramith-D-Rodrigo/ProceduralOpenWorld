@@ -22,6 +22,7 @@ public class Player : MonoBehaviour
     public GameObject XRCameraOffset;
     public GameObject interactionManager;
     public GameObject playerVR;
+    public Transform playerVRTransform;
     public Transform playerVRCameraPlacement;
     private Vector3 XROriginPlacementOffset;
 
@@ -52,7 +53,7 @@ public class Player : MonoBehaviour
             }
             else
             {
-                return playerVR.transform;
+                return playerVRTransform;
             }
         }
     }
@@ -67,8 +68,6 @@ public class Player : MonoBehaviour
         playerVR.SetActive(false);
 
         XRCameraOffset.SetActive(false);
-
-        //StartCoroutine(TurnOffXROriginAfterSomeTime());
     }
 
     // Update is called once per frame
@@ -78,12 +77,6 @@ public class Player : MonoBehaviour
         {
             SwitchView();
         }
-    }
-
-    IEnumerator TurnOffXROriginAfterSomeTime()
-    {
-        yield return new WaitForSeconds(1.0f);
-        XROrigin.SetActive(false);
     }
 
     public void StopAllMovements()
@@ -188,12 +181,16 @@ public class Player : MonoBehaviour
             thirdPersonController.enabled = true;
             thirdPersonAnimator.enabled = true;
             thirdPersonGameObject.SetActive(true);
+
+            thirdPersonTransform.SetPositionAndRotation(playerVRTransform.position, playerVRTransform.rotation);
         }
         else if(viewBeforeVR == PlayerView.FirstPerson)
         {
             firstPersonController.enabled = true;
             firstPersonAnimator.enabled = true;
             firstPersonGameObject.SetActive(true);
+
+            firstPersonTransform.SetPositionAndRotation(playerVRTransform.position, playerVRTransform.rotation);
         }
 
         currentView = viewBeforeVR;
