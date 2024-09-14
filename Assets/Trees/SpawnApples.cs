@@ -9,6 +9,7 @@ public class SpawnApples : MonoBehaviour
     public float appleLifeTime = 80.0f; //destroy apples after 80 seconds
     public bool shouldSpawnApples = false;
     public Transform spawnLocations; //locations where apples can spawn (children of this transform)
+    public Transform parent; //parent of the apples (the tree)
 
     float currentTime = 0.0f;
     Queue<GameObject> apples = new Queue<GameObject>(); //to store apples so that we can reuse them
@@ -48,7 +49,7 @@ public class SpawnApples : MonoBehaviour
             GameObject apple = null;
             if(apples.Count == 0)
             {
-                apple = Instantiate(spawnApplesPrefab, spawn.position, Quaternion.identity);
+                apple = Instantiate(spawnApplesPrefab, spawn.position, Quaternion.identity, parent);
             }
             else
             {

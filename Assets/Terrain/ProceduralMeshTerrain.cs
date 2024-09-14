@@ -427,6 +427,7 @@ public class ProceduralMeshTerrain : MonoBehaviour
             spawnApplesComponent.spawnApplesPrefab = applePrefab;
             Transform spawnLocations = tree.transform.Find("Apple Spawn Locations");
             spawnApplesComponent.spawnLocations = spawnLocations;
+            spawnApplesComponent.parent = tree.transform;
 
             instantiatedTrees.Add(treePos.Key, tree);
         }
