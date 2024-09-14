@@ -2957,6 +2957,7 @@ GameObject:
   - component: {fileID: 1324777241}
   - component: {fileID: 1324777240}
   - component: {fileID: 1324777239}
+  - component: {fileID: 1324777242}
   m_Layer: 0
   m_Name: XR Origin (XR Rig)
   m_TagString: Untagged
@@ -3012,6 +3013,31 @@ Transform:
   - {fileID: 1357079732}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1324777242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1324777238}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5971f453ba4be1641a97298c9ee3826b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  teleporation: {fileID: 1554397455}
+  teleportationAction:
+    m_UseReference: 1
+    m_Action:
+      m_Name: Teleportation
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 24bf5b55-0ecf-47c5-8842-d9cf86b4d960
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 83097790271614945, guid: c348712bda248c246b8c49b3db54643f, type: 3}
 --- !u!4 &1352652506 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6402030949780715019, guid: dc1053b7f19a7dd46a37434bb4be97ad, type: 3}
@@ -3200,6 +3226,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 18ddb545287c546e19cc77dc9fbb2189, type: 3}
+--- !u!1 &1554397455 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2761784063978902507, guid: c1800acf6366418a9b5f610249000331, type: 3}
+  m_PrefabInstance: {fileID: 1501860510}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1604119311
 GameObject:
   m_ObjectHideFlags: 0
@@ -3339,6 +3370,7 @@ MonoBehaviour:
   normalizeDividngFactor: 1.9
   waterPrefab: {fileID: 8191337359296515599, guid: 8a8ade231d4e4115a527f463ebb01a8b, type: 3}
   lowPolyTreePrefab: {fileID: 1913398837464306055, guid: f11941cc0a9abce49b84ce15ca746fa0, type: 3}
+  applePrefab: {fileID: 8970601274785304194, guid: 7dc101031b3a95f43b4143d2777a63f5, type: 3}
   treeDensity: 0.1
   treeScale: 1
   cloudPrefab: {fileID: 3414594373478531100, guid: bb8f1ba30fc9d9d4eb64d12f9bc9d4f6, type: 3}
