@@ -48,8 +48,9 @@ public class ProceduralMeshTerrain : MonoBehaviour
     public GameObject waterPrefab;
     private GameObject water;
 
-    //tree prefab
+    //tree and apple prefab
     public GameObject lowPolyTreePrefab;
+    public GameObject applePrefab;
     public float treeDensity = 0.5f;
     public float treeScale = 1.0f;
     float lowTreeHeightBoundary;
@@ -58,8 +59,6 @@ public class ProceduralMeshTerrain : MonoBehaviour
     //cloud prefab
     public GameObject cloudPrefab;
     private GameObject cloud;
-    float cloudHeight = 0.8f;
-
 
     Dictionary<Vector2, GameObject> instantiatedTrees = new();
 
@@ -166,7 +165,7 @@ public class ProceduralMeshTerrain : MonoBehaviour
                     bool isDequeued = treeThreadInfos.TryDequeue(out threadInfo);
                     if (isDequeued)
                     {
-                        threadInfo.callback(threadInfo.treePositions, threadInfo.treePrefab, threadInfo.noiseMap);
+                        threadInfo.callback(threadInfo.treePositions, threadInfo.treePrefab, threadInfo.applePrefab, threadInfo.noiseMap);
                     }
                 }
             }
@@ -381,7 +380,7 @@ public class ProceduralMeshTerrain : MonoBehaviour
 
         Dictionary<Vector2, Vector3> treePositions =  GenerateTreePositions(treeScale, treeDensity, mapChunkSize, seed, 
             meshData, noiseMap, lowTreeHeightBoundary, highTreeHeightBoundary);
-        InstantiateTrees(treePositions, instantiatedTrees, lowPolyTreePrefab, transform);
+        InstantiateTrees(treePositions, instantiatedTrees, lowPolyTreePrefab, transform, applePrefab);
     }
 
     public static Dictionary<Vector2, Vector3> GenerateTreePositions(float treeScale, float treeDensity, int mapChunkSize, int seed, 
@@ -416,7 +415,7 @@ public class ProceduralMeshTerrain : MonoBehaviour
     }
 
     public static void InstantiateTrees(Dictionary<Vector2, Vector3> treePositions, Dictionary<Vector2, GameObject> instantiatedTrees, 
-        GameObject treePrefab, Transform parent)
+        GameObject treePrefab, Transform parent, GameObject applePrefab)
     {
         foreach (KeyValuePair<Vector2, Vector3> treePos in treePositions)
         {
@@ -424,6 +423,12 @@ public class ProceduralMeshTerrain : MonoBehaviour
             tree.transform.localPosition = treePos.Value;
             tree.transform.rotation = Quaternion.Euler(0, UnityEngine.Random.Range(0, 360), 0);
             tree.transform.localScale = Vector3.one * UnityEngine.Random.Range(0.8f, 1.2f);
+            SpawnApples spawnApplesComponent = tree.AddComponent<SpawnApples>();
+            spawnApplesComponent.spawnApplesPrefab = applePrefab;
+            Transform spawnLocations = tree.transform.Find("Apple Spawn Locations");
+            spawnApplesComponent.spawnLocations = spawnLocations;
+            spawnApplesComponent.parent = tree.transform;
+
             instantiatedTrees.Add(treePos.Key, tree);
         }
     }
@@ -472,7 +477,7 @@ public class ProceduralMeshTerrain : MonoBehaviour
     }
 
     public void RequestTreeData(MeshData meshData, Transform parent, Dictionary<Vector2, GameObject> trees, 
-        Action<Dictionary<Vector2, Vector3>, GameObject, float[,]> callBack)
+        Action<Dictionary<Vector2, Vector3>, GameObject, GameObject, float[,]> callBack)
 
     {
         ThreadStart threadStart = delegate
@@ -484,12 +489,12 @@ public class ProceduralMeshTerrain : MonoBehaviour
     }
 
     public void TreeDataThread(MeshData meshData, Transform parent, Dictionary<Vector2, GameObject> trees,
-        Action<Dictionary<Vector2, Vector3>, GameObject, float[,]> callBack)
+        Action<Dictionary<Vector2, Vector3>, GameObject, GameObject, float[,]> callBack)
     {
         Dictionary<Vector2, Vector3> treePositions = GenerateTreePositions(treeScale, treeDensity, mapChunkSize, seed,
                 meshData, meshData.originalNoiseMap, lowTreeHeightBoundary, highTreeHeightBoundary);
         lock (treeThreadInfos) {
-            treeThreadInfos.Enqueue(new TreeThreadInfo(callBack, treePositions, lowPolyTreePrefab, meshData.originalNoiseMap));
+            treeThreadInfos.Enqueue(new TreeThreadInfo(callBack, treePositions, lowPolyTreePrefab, applePrefab, meshData.originalNoiseMap));
         }
     }
 
@@ -506,17 +511,19 @@ public class ProceduralMeshTerrain : MonoBehaviour
 
     struct TreeThreadInfo
     {
-        public readonly Action<Dictionary<Vector2, Vector3>, GameObject, float[,]> callback;
+        public readonly Action<Dictionary<Vector2, Vector3>, GameObject, GameObject, float[,]> callback;
         public readonly Dictionary<Vector2, Vector3> treePositions;
         public readonly GameObject treePrefab;
+        public readonly GameObject applePrefab;
         public readonly float[,] noiseMap;
 
-        public TreeThreadInfo(Action<Dictionary<Vector2, Vector3>, GameObject, float[,]> callback, 
-            Dictionary<Vector2, Vector3> treePositions, GameObject treePrefab, float[,] noiseMap)
+        public TreeThreadInfo(Action<Dictionary<Vector2, Vector3>, GameObject, GameObject, float[,]> callback, 
+            Dictionary<Vector2, Vector3> treePositions, GameObject treePrefab, GameObject applePrefab, float[,] noiseMap)
         {
             this.callback = callback;
             this.treePositions = treePositions;
             this.treePrefab = treePrefab;
+            this.applePrefab = applePrefab;
             this.noiseMap = noiseMap;
         }
     }

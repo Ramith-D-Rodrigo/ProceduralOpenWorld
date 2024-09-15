@@ -92,6 +92,9 @@ public class NPCDialogSystem : MonoBehaviour
         convo.Add(("Player", "No problem!"));
         convo.Add(("Granny", "Here, take this as a token of my gratitude."));
         convo.Add(("Player", "Thank you!"));
+        convo.Add(("Granny", "With this, you can move faster and pick up those apples."));
+        convo.Add(("Granny", "Press X to use it when you want."));
+        convo.Add(("Player", "What's an X?"));
 
         List<(string, string)>[] allConvos = {convo};
         npcDialogs.Add(NPCType.Granny, allConvos);

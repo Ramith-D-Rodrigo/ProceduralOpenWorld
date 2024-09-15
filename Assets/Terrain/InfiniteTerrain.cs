@@ -6,6 +6,7 @@ using UnityEngine;
 using Unity.AI.Navigation;
 using UnityEngine.AI;
 using UnityEditor.Rendering;
+using UnityEngine.XR.Interaction.Toolkit;
 
 public class InfiniteTerrain : MonoBehaviour
 {
@@ -186,9 +187,6 @@ public class InfiniteTerrain : MonoBehaviour
         public bool isInitialized = false;
         int chunkSize;
 
-        bool hasFishingGuy = false;
-        bool hasSwimmingGirl = false;
-
         public TerrainChunk(Vector2 coord, int size, LODInfo[] LODDetails, Transform parent, Material material, float scale, 
             AnimationCurve regionHeightCurve, GameObject waterPrefab, bool isInGodMode)
         {
@@ -211,6 +209,9 @@ public class InfiniteTerrain : MonoBehaviour
             meshObject.transform.parent = groupedParent.transform;
             meshObject.transform.localScale = Vector3.one * scale;
             meshObject.transform.localPosition = Vector3.zero;
+
+            TeleportationArea area = meshObject.AddComponent<TeleportationArea>();
+            area.interactionLayers = LayerMask.GetMask("Teleport");
 
             Vector2 boundSizes = new Vector2(size, size);
 
@@ -423,10 +424,10 @@ public class InfiniteTerrain : MonoBehaviour
             updateCallback();
         }
 
-        void OnTreeDataReceived(Dictionary<Vector2, Vector3> treePositions, GameObject treePrefab, float[,] noiseMap)
+        void OnTreeDataReceived(Dictionary<Vector2, Vector3> treePositions, GameObject treePrefab, GameObject applePrefab, float[,] noiseMap)
         {
             meshTerrainGenerator.ClearTrees(trees, noiseMap);
-            ProceduralMeshTerrain.InstantiateTrees(treePositions, trees, treePrefab, parent);
+            ProceduralMeshTerrain.InstantiateTrees(treePositions, trees, treePrefab, parent, applePrefab);
             hasReceivedTreeData = true;
             updateCallback();
         }
