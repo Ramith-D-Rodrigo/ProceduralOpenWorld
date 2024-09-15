@@ -15,6 +15,10 @@ public class TalkState : NPCState
     public void Exit(NPC npc)
     {
         npc.dialogSystem.EndConversation();
+        if(npc as GrannyNPC != null && previousState == NPCStateId.Happy)
+        {
+            npc.player.VRHandler.enabled = true;
+        }
     }
 
     public NPCStateId GetId()

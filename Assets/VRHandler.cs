@@ -7,7 +7,6 @@ using UnityEngine.XR.Management;
 public class VRHandler : MonoBehaviour
 {
     private XRManagerSettings xrManagerSettings;
-    // Start is called before the first frame update
     private bool isVREnabled = false;
 
     public Player player;

@@ -25,6 +25,7 @@ public class Player : MonoBehaviour
     public Transform playerVRTransform;
     public Transform playerVRCameraPlacement;
     private Vector3 XROriginPlacementOffset;
+    public VRHandler VRHandler;
 
     KeyCode viewSwitchKey = KeyCode.V;
 

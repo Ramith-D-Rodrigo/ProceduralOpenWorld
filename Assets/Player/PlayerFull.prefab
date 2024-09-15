@@ -64,6 +64,7 @@ MonoBehaviour:
   playerVR: {fileID: 198099697882300283}
   playerVRTransform: {fileID: 3737431030577201637}
   playerVRCameraPlacement: {fileID: 7584122902652880803}
+  VRHandler: {fileID: 4167239709619657879}
   currentView: 0
 --- !u!114 &4167239709619657879
 MonoBehaviour:
@@ -72,7 +73,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2412638014864870167}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 20bfe58592db6394da0dc2e9196e69ee, type: 3}
   m_Name: 
