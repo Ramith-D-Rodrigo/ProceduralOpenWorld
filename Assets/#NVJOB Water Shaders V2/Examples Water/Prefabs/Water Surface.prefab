@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8191337359296515596}
   - component: {fileID: 8191337359296515597}
   - component: {fileID: 8191337359296515598}
-  m_Layer: 0
+  m_Layer: 4
   m_Name: Water Surface
   m_TagString: Untagged
   m_Icon: {fileID: 0}
